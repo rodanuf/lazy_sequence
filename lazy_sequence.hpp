@@ -1,22 +1,15 @@
-#pragma once 
+#pragma once
+
+#include "../pointers/weak_ptr.hpp"
+#include "../pointers/shared_ptr.hpp"
+#include "../lab3_2ndsem/headers/sequence.hpp"
+#include "../lab3_2ndsem/headers/array_sequence.hpp"
 
 template <typename T>
 class lazy_sequence 
 {
-private: 
-    class generator
-    {
-    public:
-        virtual T& get_next() = 0;
-        virtual T& get_prev() = 0;
-        virtual T& has_next() = 0;
-
-        virtual shared_ptr<generator> insert(const shared_ptr<lazy_sequence<T>>& other, int start, int end) = 0;
-        virtual shared_ptr<generator> get_segment(int start, int end, const shared_ptr<lazy_sequence>>& parent);
-        virtual bool has_prev() = 0;
-    };
-
-    class default_generator : public generator
+private:
+    class default_generator
     {
         weak_ptr<sequence<T>> owner;
         int arity;
@@ -27,11 +20,12 @@ private:
         default_generator(sequence<T>* seq, int arity = 1, std::fucntion<T,(T)>> other_ungenerator);
         default_generator(sequence<T>* seq, int arity = 2, std::fucntion<T, (T, T)>> other_bingenerator);
         default_generator(sequence<T>* seq, int arity, std::fucntion<T(sequence<T>*)> other_generator);
+
         virtual T& get_next() override;
         virtual bool has_next() override;
     };
 
-    class skip_generator : public generator
+    class skip_generator : public default_generator
     {
         shared_ptr<lazy_sequence<T>> owner;
         shared_ptr<lazy_sequence<T>> parent;
@@ -39,9 +33,13 @@ private:
         int end_skip;
     public:
         skip_generator(shared_ptr<lazy_sequence<T>> owner, int start_skip, int end_skip, shared_ptr<lazy_sequence<T>> parent);
+
+        lazy_sequence<T>& skip
+        virtual T& get_next() override;
+        virtual bool has_next() override;
     };
 
-    class insert_generator : public generator
+    class insert_generator : public default_generator
     {
         shared_ptr<lazy_sequence<T>> owner;
         shared_ptr<lazy_sequence<T>> other;
@@ -49,19 +47,24 @@ private:
         int end;
     public:
         insert_generator(shared_ptr<lazy_sequence<T>> owner, shared_ptr<lazy_sequence<T>> other, int start, int end);
+        insert_generator(shared_ptr<lazy_sequence<T>> owner, int index);
 
-        get_next
+        lazy_sequence<T>& insert();
+        lazy_sequence<T>& set(T& element, int idx);
+        virtual T& get_next() override;
+        virtual bool has_next() override;
     };
 
+
+
 protected:
-    uniq_ptr<sequence<T>> materialized;
-    uniq_ptr<sequence<operations>> ops;
-    generator* geneartor__;
+    uniq_ptr<sequence<T>> buffer;
+    default_generator* geneartor__;
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);
 
-    generator* get_generator();
+    default_generator* get_generator();
 
 public:
     lazy_sequence();
@@ -87,12 +90,8 @@ public:
     lazy_sequence<T>* map(std::function<T(T)> func);
     lazy_sequence<T>* where(std::function<bool(T)> func);
     lazy_sequence<T>* zip(sequence<T>* seq);
-
-
-    void set(int index, T item);
-    void set_first(T item);
-    void set_last(T item);
-    void add(T item);
-
+    lazy_sequence<T>* set(T& item, int index); // remake with ordinal
+    lazy_sequence<T>* set_first();
+    lazy_sequence<T>* set_last();
 
 };
