@@ -11,15 +11,15 @@ class lazy_sequence
 private:
     class default_generator
     {
-        weak_ptr<sequence<T>> owner;
+        weak_ptr<lazy_sequence<T>> owner;
         int arity;
         std::function<T(T)> unary_generator;
         std::function<T(T, T)> binary_generator;
         std::function<T(sequence<T>*)> generator;
     public:
-        default_generator(sequence<T>* seq, int arity = 1, std::fucntion<T,(T)>> other_ungenerator);
-        default_generator(sequence<T>* seq, int arity = 2, std::fucntion<T, (T, T)>> other_bingenerator);
-        default_generator(sequence<T>* seq, int arity, std::fucntion<T(sequence<T>*)> other_generator);
+        default_generator(lazy_sequence<T>* seq, int arity = 1, std::fucntion<T,(T)> ungenerator);
+        default_generator(lazy_sequence<T>* seq, int arity = 2, std::fucntion<T, (T, T)> bingenerator);
+        default_generator(lazy_sequence<T>* seq, int arity, std::fucntion<T(sequence<T>*)> generator);
 
         virtual T& get_next() override;
         virtual bool has_next() override;
@@ -58,7 +58,7 @@ private:
 
 
 protected:
-    uniq_ptr<sequence<T>> buffer;
+    uniq_ptr<array_sequence<T>> buffer;
     default_generator* geneartor__;
 
 private:
@@ -95,3 +95,5 @@ public:
     lazy_sequence<T>* set_last();
 
 };
+
+#include "lazy_sequence.tpp"
