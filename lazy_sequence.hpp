@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "../pointers/weak_ptr.hpp"
 #include "../pointers/shared_ptr.hpp"
 #include "../lab3_2ndsem/headers/sequence.hpp"
@@ -9,21 +10,33 @@ template <typename T>
 class lazy_sequence 
 {
 private:
-    class default_generator
+    class generator
     {
-        weak_ptr<lazy_sequence<T>> owner;
-        int arity;
-        std::function<T(T)> unary_generator;
-        std::function<T(T, T)> binary_generator;
-        std::function<T(sequence<T>*)> generator;
     public:
-        default_generator(lazy_sequence<T>* seq, int arity = 1, std::fucntion<T,(T)> ungenerator);
-        default_generator(lazy_sequence<T>* seq, int arity = 2, std::fucntion<T, (T, T)> bingenerator);
-        default_generator(lazy_sequence<T>* seq, int arity, std::fucntion<T(sequence<T>*)> generator);
-
-        virtual T& get_next() override;
-        virtual bool has_next() override;
+        virtual T& get_next() = 0;
     };
+
+    class unary_generator : public generator
+    {
+        shared_ptr<lazy_sequence<T>> owner;
+        std::function<T(T)> unary_function;
+    public:
+        unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfuncton);
+
+        T& get_next() override;
+        bool has_next() override;
+    };
+
+    class binary_generator : public generator
+    {
+        shared_ptr<lazy_sequence<T>> owner;
+        std::function<T(T,T)> binary_function;
+    public:
+        binary_generator(lazy_sequence<T>* seq, std::function<T(T,T)> binfunction);
+
+        T& get_next() override;
+        bool has_next() override;
+    }
 
     class skip_generator : public default_generator
     {
@@ -58,7 +71,7 @@ private:
 
 
 protected:
-    uniq_ptr<array_sequence<T>> buffer;
+    uniq_ptr<sequence<T>> buffer;
     default_generator* geneartor__;
 
 private:
