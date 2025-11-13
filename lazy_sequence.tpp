@@ -2,12 +2,14 @@
 #include <stdexcept>
 
 template <typename T>
-lazy_sequence<T>::unary_generator::unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfunc) : owner(seq), unary_function(unfunc) {}
+lazy_sequence<T>::unary_generator::unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfunc) : owner(seq), generator_storage((*(*seq).buffer).clone()), unary_function(unfunc) {}
 
 template <typename T>
 T& lazy_sequence<T>::unary_generator::get_next()
 {
-    return unary_function((*owner).get_last());
+    (*generator_storage).append_element(unary_function((*owner).get_last()));
+    (*generator_storage).remove_at(0);
+    return (*generator_storage).get_last();
 }
 
 template <typename T>

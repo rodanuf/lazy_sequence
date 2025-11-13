@@ -14,11 +14,13 @@ private:
     {
     public:
         virtual T& get_next() = 0;
+        virtual bool has_next() = 0;
     };
 
     class unary_generator : public generator
     {
         shared_ptr<lazy_sequence<T>> owner;
+        shared_ptr<sequence<T>> generator_storage;
         std::function<T(T)> unary_function;
     public:
         unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfunc);
@@ -30,6 +32,7 @@ private:
     class binary_generator : public generator
     {
         shared_ptr<lazy_sequence<T>> owner;
+        shared_ptr<sequence<T>> generator_storage;
         std::function<T(T,T)> binary_function;
     public:
         binary_generator(lazy_sequence<T>* seq, std::function<T(T,T)> binfunc);
@@ -42,6 +45,7 @@ private:
     {
         shared_ptr<lazy_sequence<T>> owner;
         int arity;
+        shared_ptr<sequence<T>> generator_storage;
         std::function<T(sequence<T>*)> sequence_function;
     public: 
         sequence_generator(lazy_sequence<T>* seq, int ar, std::function<T(sequence<T>*)> seqfunc);
@@ -57,10 +61,12 @@ private:
         shared_ptr<lazy_sequence<T>> parent__;
         int start_idx;
         int end_idx;
+        uniq_ptr<lazy_sequence<T>> generator_storage;
     public:
         skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip);
 
-        lazy_sequence<T>& skip
+        void skip();
+
         virtual T& get_next() override;
         virtual bool has_next() override;
     };
@@ -85,12 +91,12 @@ private:
 
 protected:
     uniq_ptr<sequence<T>> buffer;
-    default_generator* geneartor__;
+    generator* geneartor__;
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);
 
-    default_generator* get_generator();
+    generator* get_generator();
 
 public:
     lazy_sequence();
