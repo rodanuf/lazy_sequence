@@ -6,7 +6,7 @@
 #include "../lab3_2ndsem/headers/sequence.hpp"
 #include "../lab3_2ndsem/headers/array_sequence.hpp"
 
-template <typename T>
+template <typename T> //uml диаграмма данных
 class lazy_sequence 
 {
 private:
@@ -19,11 +19,10 @@ private:
 
     class unary_generator : public generator
     {
-        shared_ptr<lazy_sequence<T>> owner;
-        shared_ptr<sequence<T>> generator_storage;
+        T generator_storage;
         std::function<T(T)> unary_function;
     public:
-        unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfunc);
+        unary_generator(lazy_sequence<T>* owner, std::function<T(T)> unfunc);
 
         T& get_next() override;
         bool has_next() override;
@@ -31,37 +30,33 @@ private:
 
     class binary_generator : public generator
     {
-        shared_ptr<lazy_sequence<T>> owner;
-        shared_ptr<sequence<T>> generator_storage;
+        sequence<T> generator_storage;
         std::function<T(T,T)> binary_function;
     public:
-        binary_generator(lazy_sequence<T>* seq, std::function<T(T,T)> binfunc);
+        binary_generator(lazy_sequence<T>* onwer, std::function<T(T,T)> binfunc);
 
         T& get_next() override;
         bool has_next() override;
     }
 
-    class sequence_generator : public generator
+    class sequence_generator : public generator// переименовать на n-арный 
     {
-        shared_ptr<lazy_sequence<T>> owner;
         int arity;
-        shared_ptr<sequence<T>> generator_storage;
+        sequence<T> generator_storage; 
         std::function<T(sequence<T>*)> sequence_function;
     public: 
-        sequence_generator(lazy_sequence<T>* seq, int ar, std::function<T(sequence<T>*)> seqfunc);
+        sequence_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc);
 
         T& get_next() override;
         bool has_next() override;
     }
 
 
-    class skip_generator : public default_generator
+    class skip_generator : public default_generator //подчеркивания убрать
     {
-        shared_ptr<lazy_sequence<T>> owner__;
-        shared_ptr<lazy_sequence<T>> parent__;
+        shared_ptr<lazy_sequence<T>> parent_;
         int start_idx;
         int end_idx;
-        uniq_ptr<lazy_sequence<T>> generator_storage;
     public:
         skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip);
 

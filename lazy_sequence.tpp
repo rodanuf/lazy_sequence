@@ -2,47 +2,77 @@
 #include <stdexcept>
 
 template <typename T>
-lazy_sequence<T>::unary_generator::unary_generator(lazy_sequence<T>* seq, std::function<T(T)> unfunc) : owner(seq), generator_storage((*(*seq).buffer).clone()), unary_function(unfunc) {}
+lazy_sequence<T>::unary_generator::unary_generator(lazy_sequence<T>* owner, std::function<T(T)> unfunc)
+{
+    if (owner == nullptr)
+    {
+        throw std::invalid_argument("Owner is nullptr");
+    }
+    generator_storage = (owner->buffer.get())->get_last();
+    unary_function = unfunc
+}
 
 template <typename T>
 T& lazy_sequence<T>::unary_generator::get_next()
 {
-    (*generator_storage).append_element(unary_function((*owner).get_last()));
-    (*generator_storage).remove_at(0);
-    return (*generator_storage).get_last();
+    generator_storage = unary_function(generator_storage);
+    return generator_storage;
 }
 
 template <typename T>
 bool lazy_sequence<T>::unary_generator::has_next()
 {
-    return unary_function((*owner).get_last());
+    return unary_function(generator_storage);
 }
 
 
 template <typename T>
-lazy_sequence<T>::binary_generator::binary_generator(lazy_sequence<T>* seq, std::function<T(T,T)> binfunc) : owner(seq), binary_function(binfunc) {}
+lazy_sequence<T>::binary_generator::binary_generator(lazy_sequence<T>* owner, std::function<T(T,T)> binfunc)
+{
+    if (owner == nullptr)
+    {
+        throw std::invalid_argument("Owner is nullptr");
+    }
+    int last_idx = (owner->buffer.get())->get_length() - 1;
+    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - 1, last_idx))
+    binary_function = binfunc;
+}
 
 template <typename T>
 T& lazy_sequence<T>::binary_generator::get_next()
 {
-    return binary_function((*owner).get((*owner).get_length() - 1), (*owner).get_last())
+    T& result = binary_function(generator_storage.get_first(), generator_storage.get_last());
+    generator_storage.remove_at(0);
+    generator_storage.append_element(result);
+    return result;
 }
 
 template <typename T>
 bool lazy_sequence<T>::binary_generator::has_next()
 {
-    return binary_function((*owner).get((*owner).get_length() - 1), (*owner).get_last())
+    return binary_function(generator_storage.get_first(), generator_storage.get_last())
 }
 
 template <typename T>
-lazy_sequence<T>::sequence_generator::sequence_generator(lazy_sequence<T>* seq, int ar, std::function<T(sequence<T>*)> seqfunc) : owner(seq), arity(ar), sequence_function(seqfunc) {}
+lazy_sequence<T>::sequence_generator::sequence_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc)
+{
+    if (owner == nullptr)
+    {
+        throw std::invalid_argument("Owner is nullptr");
+    }
+
+    int last_idx = (owner->buffer.get())->get_length() - 1;
+    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - arity, last_idx));
+    sequence_function = seqfunc;
+}
 
 template <typename T>
 T& lazy_sequence<T>::sequence_generator::get_next()
 {
-    int last_idx = (*owner).get_length() - 1;
-    int start_arity = last_idx - arity;
-    return sequence_function((*owner).get_subsequence(start_arity, last_idx))
+    T& result = sequence_function(&generator_storage);
+    generator_storage.append_element(result);
+    generator_storage.remove_at(0);
+    return result;
 }
 
 template <typename T>
@@ -67,7 +97,3 @@ lazy_sequence<T>::skip_generator::skip_generator(lazy_sequence<T>* owner, lazy_s
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::skip_generator::skip()
-{
-
-}
