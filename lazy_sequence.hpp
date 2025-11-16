@@ -39,45 +39,44 @@ private:
         bool has_next() override;
     }
 
-    class sequence_generator : public generator// переименовать на n-арный 
+    class nary_generator : public generator
     {
         int arity;
         sequence<T> generator_storage; 
         std::function<T(sequence<T>*)> sequence_function;
     public: 
-        sequence_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc);
+        nary_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc);
 
         T& get_next() override;
         bool has_next() override;
     }
 
 
-    class skip_generator : public default_generator //подчеркивания убрать
+    class skip_generator : public generator //подчеркивания убрать
     {
-        shared_ptr<lazy_sequence<T>> parent_;
+        shared_ptr<lazy_sequence<T>> parent;
         int start_idx;
         int end_idx;
     public:
         skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip);
 
         void skip();
+        void skip(int new_start, int new_end);
 
         virtual T& get_next() override;
         virtual bool has_next() override;
     };
 
-    class insert_generator : public default_generator
+    class insert_generator : public generator
     {
-        shared_ptr<lazy_sequence<T>> owner;
+        shared_ptr<lazy_sequence<T>> parent;
         shared_ptr<lazy_sequence<T>> other;
-        int start;
-        int end;
+        int start_idx;
+        int end_idx;
     public:
-        insert_generator(shared_ptr<lazy_sequence<T>> owner, shared_ptr<lazy_sequence<T>> other, int start, int end);
-        insert_generator(shared_ptr<lazy_sequence<T>> owner, int index);
+        insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other, int start, int end);
+        insert_generator(shared_ptr<lazy_sequence<T>> parent, int index);
 
-        lazy_sequence<T>& insert();
-        lazy_sequence<T>& set(T& element, int idx);
         virtual T& get_next() override;
         virtual bool has_next() override;
     };
@@ -86,7 +85,7 @@ private:
 
 protected:
     uniq_ptr<sequence<T>> buffer;
-    generator* geneartor__;
+    generator* geneartor_;
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);

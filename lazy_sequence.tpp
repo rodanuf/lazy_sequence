@@ -54,7 +54,7 @@ bool lazy_sequence<T>::binary_generator::has_next()
 }
 
 template <typename T>
-lazy_sequence<T>::sequence_generator::sequence_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc)
+lazy_sequence<T>::nary_generator::nary_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc)
 {
     if (owner == nullptr)
     {
@@ -67,7 +67,7 @@ lazy_sequence<T>::sequence_generator::sequence_generator(lazy_sequence<T>* owner
 }
 
 template <typename T>
-T& lazy_sequence<T>::sequence_generator::get_next()
+T& lazy_sequence<T>::nary_generator::get_next()
 {
     T& result = sequence_function(&generator_storage);
     generator_storage.append_element(result);
@@ -76,14 +76,14 @@ T& lazy_sequence<T>::sequence_generator::get_next()
 }
 
 template <typename T>
-bool lazy_sequence<T>::sequence_generator::has_next()
+bool lazy_sequence<T>::nary_generator::has_next()
 {
     return this->get_next();
 }
 
 template <typename T>
 lazy_sequence<T>::skip_generator::skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip)
-: owner__(owner), parent__(parent), start_idx(start_skip), end_idx(end_skip)
+: parent(parent), start_idx(start_skip), end_idx(end_skip)
 {
     if ((end_idx > start_idx) || (end_idx < 0 || start_idx))
     {
@@ -97,3 +97,68 @@ lazy_sequence<T>::skip_generator::skip_generator(lazy_sequence<T>* owner, lazy_s
 }
 
 template <typename T>
+void lazy_sequence<T>::skip_generator::skip()
+{
+    if (start_idx == end_idx)
+    {
+        return;
+    }
+    for (int i = start_idx; i <= end_idx; i++)
+    {
+        (*parent).generator_->get_next();
+    }
+    start_idx = 0;
+    end_idx = 0;
+}
+
+template <typename T>
+void lazy_sequence<T>::skip_generator::skip(int new_start, int new_end)
+{
+    this->start_idx = new_start;
+    this->end_idx = new_end;
+    skip();
+}
+
+template <typename T>
+T& lazy_sequence<T>::skip_generator::get_next()
+{
+    skip();
+    return (*parent).generator_->get_next();
+}
+
+template <typename T>
+bool lazy_sequence<T>::skip_generator::has_next()
+{
+    if ( start_idx == end_idx)
+    {
+        return (*parent).generator_->has_next();
+    }
+}
+
+template <typename T>
+lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other, int start, int end)
+{
+    this->parent = parent;
+    this->other = other;
+    start_idx = start;
+    end_idx = end;
+}
+
+template <typename T>
+lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, int index)
+{
+    this->parent = parent;
+    start_idx = index;
+    end_idx = index + 1;
+}
+
+template <typename T>
+T& lazy_sequence<T>::insert_generator::get_next()
+{
+    if (start_idx + 1 == end_idx)
+    {
+        return (*parent).generator_->get_next();
+    }
+    if ()
+    return (*other).generator_->get_next();
+}
