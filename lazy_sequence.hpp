@@ -15,6 +15,7 @@ private:
     public:
         virtual T& get_next() = 0;
         virtual bool has_next() = 0;
+        virtual generator* copy() = 0;
     };
 
     class unary_generator : public generator
@@ -71,21 +72,34 @@ private:
     {
         shared_ptr<lazy_sequence<T>> parent;
         shared_ptr<lazy_sequence<T>> other;
-        int start_idx;
-        int end_idx;
+        T& element;
     public:
-        insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other, int start, int end);
-        insert_generator(shared_ptr<lazy_sequence<T>> parent, int index);
+        insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other);
+        insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem);
+
+        T& get_element();
+        T& get_other_next();
 
         virtual T& get_next() override;
         virtual bool has_next() override;
     };
 
+    class ls_iterator
+    {
+    private:
+        int cur_idx;
+    public: 
+        ls_iterator();
+        ls_iterator(int index);
 
+        int get_index();
+
+        void ckip(int start, int end);
+    };
 
 protected:
     uniq_ptr<sequence<T>> buffer;
-    generator* geneartor_;
+    generator* generator_;
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);
@@ -96,8 +110,8 @@ public:
     lazy_sequence();
     lazy_sequence(T* items, int size);
     lazy_sequence(sequence<T>* seq);
+    lazy_sequence(sequence<T> *seq, std::function<T(T)> other_generator);
     lazy_sequence(sequence<T>* seq, std::function<T(T, T)> other_generator);
-    lazy_sequence(sequence<T>* seq, std::function<T(T)> other_generator);
     lazy_sequence(sequence<T>* seq, int arity, std::function<T(sequence<T>*)> other_generator);
     lazy_sequence(const lazy_sequence<T>& other);
     ~lazy_sequence();

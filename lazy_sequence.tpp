@@ -34,7 +34,7 @@ lazy_sequence<T>::binary_generator::binary_generator(lazy_sequence<T>* owner, st
         throw std::invalid_argument("Owner is nullptr");
     }
     int last_idx = (owner->buffer.get())->get_length() - 1;
-    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - 1, last_idx))
+    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - 1, last_idx));
     binary_function = binfunc;
 }
 
@@ -136,16 +136,15 @@ bool lazy_sequence<T>::skip_generator::has_next()
 }
 
 template <typename T>
-lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other, int start, int end)
+lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other)
 {
+    if (*parent == nullptr || *other == nullptr)
     this->parent = parent;
     this->other = other;
-    start_idx = start;
-    end_idx = end;
 }
 
 template <typename T>
-lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, int index)
+lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem)
 {
     this->parent = parent;
     start_idx = index;
@@ -153,12 +152,126 @@ lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>
 }
 
 template <typename T>
+T& lazy_sequence<T>::insert_generator::get_element()
+{
+    return element;
+}
+
+template <typename T>
+T& lazy_sequence<T>::insert_generator::get_other_next()
+{
+    return (*other).generator_.get_next();
+}
+
+template <typename T>
 T& lazy_sequence<T>::insert_generator::get_next()
 {
-    if (start_idx + 1 == end_idx)
-    {
-        return (*parent).generator_->get_next();
-    }
-    if ()
+    return (*parent).generator_.get_next();
+}
+
+template <typename T>
+bool lazy_sequence<T>::insert_generator::has_next()
+{
+    return (*parent).generator_.has_next();
+}
+
+template <typename T>
+T& lazy_sequence<T>::insert_generator::get_next()
+{
+
     return (*other).generator_->get_next();
+}
+
+
+template <typename T>
+lazy_sequence<T>::ls_iterator::ls_iterator()
+{
+    cur_idx = 0;
+}
+
+template <typename T>
+lazy_sequence<T>::ls_iterator::ls_iterator(int index)
+{
+    cur_idx = index;
+}
+
+template <typename T>
+int lazy_sequence<T>::ls_iterator::get_index()
+{
+    return cur_idx;
+}
+
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence() : buffer(nullptr), generator_(nullptr) {}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(T* items, int size)
+{
+    array_sequence<T> seq(items, size);
+    buffer(&seq);
+    generator_ = nullptr;
+}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(sequence<T>* seq)
+{
+    if (seq == nullptr)
+    {
+        throw std::invalid_argument("Seq is null");
+    }
+
+    buffer(seq);
+    generator_ = nullptr;
+}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(sequence<T>* seq, std::function<T(T)> other_generator)
+{
+    if (seq == nullptr)
+    {
+        throw std::invalid_argument("Seq is null");
+    }
+
+    buffer(seq);
+    generator_(unary_generator(this, other_generator));
+}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(sequence<T>* seq, std::function<T(T,T)> other_generator)
+{
+    if (seq == nullptr)
+    {
+        throw std::invalid_argument("Seq is null");
+    }
+
+    buffer(seq);
+    generator_(binary_generator(this, other_generator));
+}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(sequence<T>* seq, int arity, std::function<T(sequence<T>*)> other_generator)
+{
+    if (seq == nullptr)
+    {
+        throw std::invalid_argument("Seq is null");
+    }
+
+    buffer(seq);
+    generator_(nary_generator(this, arity, other_generator));
+}
+
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(const lazy_sequence<T>& other)
+{
+    sequence<T>* seq = other.(*buffer).clone();
+    this->buffer(seq);
+    this->generator_ = other.generator_->copy();
+}
+
+template <typename T>
+lazy_sequence<T>::~lazy_sequence()
+{
+    
 }
