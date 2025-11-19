@@ -20,10 +20,11 @@ private:
 
     class unary_generator : public generator
     {
-        T generator_storage;
+        T& generator_storage;
         std::function<T(T)> unary_function;
     public:
         unary_generator(lazy_sequence<T>* owner, std::function<T(T)> unfunc);
+        ~unary_generator() = default;
 
         T& get_next() override;
         bool has_next() override;
@@ -35,6 +36,7 @@ private:
         std::function<T(T,T)> binary_function;
     public:
         binary_generator(lazy_sequence<T>* onwer, std::function<T(T,T)> binfunc);
+        ~binary_generator() = default;
 
         T& get_next() override;
         bool has_next() override;
@@ -47,6 +49,7 @@ private:
         std::function<T(sequence<T>*)> sequence_function;
     public: 
         nary_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc);
+        ~nary_generator() = default;
 
         T& get_next() override;
         bool has_next() override;
@@ -60,6 +63,7 @@ private:
         int end_idx;
     public:
         skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip);
+        ~skip_generator() = default;
 
         void skip();
         void skip(int new_start, int new_end);
@@ -76,6 +80,7 @@ private:
     public:
         insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other);
         insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem);
+        ~insert_generator() = default;
 
         T& get_element();
         T& get_other_next();
@@ -91,15 +96,22 @@ private:
     public: 
         ls_iterator();
         ls_iterator(int index);
+        ls_iterator(const ls_iterator& other);
+        ~ls_iterator() = default;
+
+        ls_iterator& operator++();
+        ls_iterator operator++(int);
 
         int get_index();
 
-        void ckip(int start, int end);
+        void skip(int start, int end);
+        void increment_idx();
     };
 
 protected:
     uniq_ptr<sequence<T>> buffer;
     generator* generator_;
+    shared_ptr<ls_iterator> iterator;
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);

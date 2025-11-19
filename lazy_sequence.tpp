@@ -196,9 +196,36 @@ lazy_sequence<T>::ls_iterator::ls_iterator(int index)
 }
 
 template <typename T>
+lazy_sequence<T>::ls_iterator::ls_iterator(const ls_iterator& other)
+{
+    this->cur_idx = other.cur_idx;
+}
+
+template <typename T>
+typename lazy_sequence<T>::ls_iterator& lazy_sequence<T>::ls_iterator::operator++()
+{
+    cur_idx++;
+    return *this;
+}
+
+template <typename T>
+typename lazy_sequence<T>::ls_iterator lazy_sequence<T>::ls_iterator::operator++(int)
+{
+    ls_iterator tmp(*this);
+    this->cur_idx++;
+    return tmp;
+}
+
+template <typename T>
 int lazy_sequence<T>::ls_iterator::get_index()
 {
     return cur_idx;
+}
+
+template <typename T>
+void lazy_sequence<T>::ls_iterator::increment_idx()
+{
+    cur_idx++;
 }
 
 
@@ -273,5 +300,47 @@ lazy_sequence<T>::lazy_sequence(const lazy_sequence<T>& other)
 template <typename T>
 lazy_sequence<T>::~lazy_sequence()
 {
-    
+    buffer.~uniq_ptr();
+    delete generator_;
+    iterator.~shared_ptr();
+}
+
+template <typename T>
+T& lazy_sequence<T>::get_first()
+{
+    (*buffer).get_first();
+}
+
+template <typename T>
+T& lazy_sequence<T>::get_last()
+{
+    (*buffer).get_last();
+}
+
+template <typename T>
+T& lazy_sequence<T>::get(int index)
+{
+    if ((*iterator).get_index >= index)
+    {
+        (*buffer).get(index);
+    }
+    else
+    {
+        while ((*iterator).get_index != index - 1)
+        {
+            this->generator_->get_next();
+            (*iterator)++;
+        }
+    }
+}
+
+//TODO
+template <typename T>
+T& lazy_sequence<T>::reduce(std::function<T(T,T)> func)
+{}//
+
+template <typename T>
+lazy_sequence<T>* lazy_sequence<T>::get_subsequence(int startidx, int endidx)
+{
+
 }
