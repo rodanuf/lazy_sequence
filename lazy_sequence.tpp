@@ -9,7 +9,7 @@ lazy_sequence<T>::unary_generator::unary_generator(lazy_sequence<T>* owner, std:
         throw std::invalid_argument("Owner is nullptr");
     }
     generator_storage = (owner->buffer.get())->get_last();
-    unary_function = unfunc
+    unary_function = unfunc;
 }
 
 template <typename T>
@@ -50,7 +50,7 @@ T& lazy_sequence<T>::binary_generator::get_next()
 template <typename T>
 bool lazy_sequence<T>::binary_generator::has_next()
 {
-    return binary_function(generator_storage.get_first(), generator_storage.get_last())
+    return binary_function(generator_storage.get_first(), generator_storage.get_last());
 }
 
 template <typename T>
@@ -147,8 +147,7 @@ template <typename T>
 lazy_sequence<T>::insert_generator::insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem)
 {
     this->parent = parent;
-    start_idx = index;
-    end_idx = index + 1;
+    element = elem;
 }
 
 template <typename T>
@@ -160,7 +159,7 @@ T& lazy_sequence<T>::insert_generator::get_element()
 template <typename T>
 T& lazy_sequence<T>::insert_generator::get_other_next()
 {
-    return (*other).generator_.get_next();
+    return (*other).generator_->get_next();
 }
 
 template <typename T>
@@ -174,14 +173,6 @@ bool lazy_sequence<T>::insert_generator::has_next()
 {
     return (*parent).generator_.has_next();
 }
-
-template <typename T>
-T& lazy_sequence<T>::insert_generator::get_next()
-{
-
-    return (*other).generator_->get_next();
-}
-
 
 template <typename T>
 lazy_sequence<T>::ls_iterator::ls_iterator()
@@ -292,7 +283,7 @@ lazy_sequence<T>::lazy_sequence(sequence<T>* seq, int arity, std::function<T(seq
 template <typename T>
 lazy_sequence<T>::lazy_sequence(const lazy_sequence<T>& other)
 {
-    sequence<T>* seq = other.(*buffer).clone();
+    sequence<T>* seq = other.buffer->clone();
     this->buffer(seq);
     this->generator_ = other.generator_->copy();
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include <functional>
-#include "../pointers/weak_ptr.hpp"
-#include "../pointers/shared_ptr.hpp"
-#include "../lab3_2ndsem/headers/sequence.hpp"
-#include "../lab3_2ndsem/headers/array_sequence.hpp"
+#include "C:/lazy_sequence/pointers/weak_ptr.hpp"
+#include "C:/lazy_sequence/pointers/shared_ptr.hpp"
+#include "C:/lazy_sequence/lab3_2ndsem/headers/sequence.hpp"
+#include "C:/lazy_sequence/lab3_2ndsem/headers/array_sequence.hpp"
 
 template <typename T> //uml диаграмма данных
 class lazy_sequence 
@@ -40,7 +40,7 @@ private:
 
         T& get_next() override;
         bool has_next() override;
-    }
+    };
 
     class nary_generator : public generator
     {
@@ -53,7 +53,7 @@ private:
 
         T& get_next() override;
         bool has_next() override;
-    }
+    };
 
 
     class skip_generator : public generator //подчеркивания убрать
