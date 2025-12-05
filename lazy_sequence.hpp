@@ -1,94 +1,15 @@
 #pragma once
 
 #include <functional>
-#include "C:/lazy_sequence/pointers/weak_ptr.hpp"
-#include "C:/lazy_sequence/pointers/shared_ptr.hpp"
-#include "C:/lazy_sequence/lab3_2ndsem/headers/sequence.hpp"
-#include "C:/lazy_sequence/lab3_2ndsem/headers/array_sequence.hpp"
+#include "../pointers/weak_ptr.hpp"
+#include "../pointers/shared_ptr.hpp"
+#include "../lab3_2ndsem/headers/sequence.hpp"
+#include "../lab3_2ndsem/headers/array_sequence.hpp"
 
 template <typename T> //uml диаграмма данных
 class lazy_sequence 
 {
 private:
-    class generator
-    {
-    public:
-        virtual T& get_next() = 0;
-        virtual bool has_next() = 0;
-        virtual generator* copy() = 0;
-    };
-
-    class unary_generator : public generator
-    {
-        T& generator_storage;
-        std::function<T(T)> unary_function;
-    public:
-        unary_generator(lazy_sequence<T>* owner, std::function<T(T)> unfunc);
-        ~unary_generator() = default;
-
-        T& get_next() override;
-        bool has_next() override;
-    };
-
-    class binary_generator : public generator
-    {
-        sequence<T> generator_storage;
-        std::function<T(T,T)> binary_function;
-    public:
-        binary_generator(lazy_sequence<T>* onwer, std::function<T(T,T)> binfunc);
-        ~binary_generator() = default;
-
-        T& get_next() override;
-        bool has_next() override;
-    };
-
-    class nary_generator : public generator
-    {
-        int arity;
-        sequence<T> generator_storage; 
-        std::function<T(sequence<T>*)> sequence_function;
-    public: 
-        nary_generator(lazy_sequence<T>* owner, int ar, std::function<T(sequence<T>*)> seqfunc);
-        ~nary_generator() = default;
-
-        T& get_next() override;
-        bool has_next() override;
-    };
-
-
-    class skip_generator : public generator //подчеркивания убрать
-    {
-        shared_ptr<lazy_sequence<T>> parent;
-        int start_idx;
-        int end_idx;
-    public:
-        skip_generator(lazy_sequence<T>* owner, lazy_sequence<T>* parent, int start_skip, int end_skip);
-        ~skip_generator() = default;
-
-        void skip();
-        void skip(int new_start, int new_end);
-
-        virtual T& get_next() override;
-        virtual bool has_next() override;
-    };
-
-    class insert_generator : public generator
-    {
-        shared_ptr<lazy_sequence<T>> parent;
-        shared_ptr<lazy_sequence<T>> other;
-        T& element;
-    public:
-        insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other);
-        insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem);
-        ~insert_generator() = default;
-
-        T& get_element();
-        T& get_other_next();
-
-        virtual T& get_next() override;
-        virtual bool has_next() override;
-    };
-
     class ls_iterator
     {
     private:
@@ -109,7 +30,7 @@ private:
     };
 
 protected:
-    uniq_ptr<sequence<T>> buffer;
+    shared_ptr<sequence<T>> buffer;
     generator* generator_;
     shared_ptr<ls_iterator> iterator;
 
