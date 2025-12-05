@@ -77,8 +77,8 @@ lazy_sequence<T>::lazy_sequence() : buffer(nullptr), generator_(nullptr) {}
 template <typename T>
 lazy_sequence<T>::lazy_sequence(T* items, int size)
 {
-    array_sequence<T> seq(items, size);
-    buffer(&seq);
+    array_sequence<T>* seq = new array_sequence<T>(items, size);
+    buffer(seq);
     generator_ = nullptr;
 }
 
@@ -134,9 +134,20 @@ lazy_sequence<T>::lazy_sequence(sequence<T>* seq, int arity, std::function<T(seq
 template <typename T>
 lazy_sequence<T>::lazy_sequence(const lazy_sequence<T>& other)
 {
-    sequence<T>* seq = other.buffer->clone();
-    this->buffer(seq);
+    buffer = other.buffer;
     this->generator_ = other.generator_->copy();
+}
+
+template <typename T>
+lazy_sequence<T>::lazy_sequence(const lazy_sequence<T>& seq_one, const lazy_sequence<T>& seq_two)
+{
+    if (seq_one == nullptr || seq_two == nullptr)
+    {
+        throw std::invalid_argument("One of seqeunces is null");
+    }
+    buffer = seq_one.buffer;
+    generator<T>* generator_ = new concat_generator(seq_one, seq_two);
+    iterator = seq_one.iterator;
 }
 
 template <typename T>
@@ -216,14 +227,16 @@ lazy_sequence<T>* lazy_sequence<T>::get_subsequence(ordinary& start_idx, ordinar
     {
         throw std::invalid_argument("Bad index");
     }
-    sequence<T> result;
+    sequence<T>* other = new sequence<T>();
     while (start_idx != end_idx)
     {
-        result.append_element(this->get(start_idx));
+        other->append_element(this->get(start_idx));
         start_idx++;
     }   
-    return &lazy_sequence(&result, generator_);
+    lazy_sequence<T>* result = new lazy_sequence(other, generator_);
+    return result;
 }
+
 template <typename T>
 lazy_sequence<T>* lazy_sequence<T>::concat(lazy_sequence<T>* other)
 {
@@ -231,12 +244,11 @@ lazy_sequence<T>* lazy_sequence<T>::concat(lazy_sequence<T>* other)
     {
         throw std::invalid_argument("Other sequence is nullptr");
     }
-    while (other->generator_->has_next())
-    {
-        this->generator_->get_next();
-        (*iterator)++;
-    }
+    lazy_sequence<T>* result = new lazy_sequence(this, other);
+    return result;
 }
 
+/*
 template <typename T>
 lazy_sequence<T>
+*/

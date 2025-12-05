@@ -18,6 +18,7 @@ private:
     {
     private:
         ordinary cur_idx;
+
     public: 
         ls_iterator();
         ls_iterator(int index);
@@ -59,6 +60,7 @@ public:
     lazy_sequence(sequence<T>* seq, std::function<T(T, T)> other_generator);
     lazy_sequence(sequence<T>* seq, int arity, std::function<T(sequence<T>*)> other_generator);
     lazy_sequence(const lazy_sequence<T>& other);
+    lazy_sequence(const lazy_sequence<T>& seq_one, const lazy_sequence<T>& seq_two);
     ~lazy_sequence();
 
     T& get_first();
