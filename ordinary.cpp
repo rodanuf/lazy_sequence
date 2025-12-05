@@ -13,7 +13,7 @@ ordinary::ordinary(const ordinary &other) : omega(other.omega), number(other.num
 
 ordinary ordinary::operator+(const ordinary &other)
 {
-    if (is_finite())
+    if (this->is_finite())
     {
         return ordinary(omega, number + other.number);
     }
@@ -144,6 +144,11 @@ bool ordinary::operator>=(const ordinary &other)
 bool ordinary::operator>=(int num)
 {
     return !(*this < num);
+}
+
+bool ordinary::is_finite()
+{
+    return number && omega;
 }
 
 int ordinary::get_omega()

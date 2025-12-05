@@ -36,7 +36,6 @@ public:
     bool operator<=(int num);
     bool operator>=(const ordinary& other);
     bool operator>=(int num);
-
     bool is_finite();
 
     int get_omega();

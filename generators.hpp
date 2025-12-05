@@ -7,21 +7,21 @@ class generator
 public:
     virtual T &get_next() = 0;
     virtual bool has_next() = 0;
-    virtual generator *copy() = 0;
+    virtual generator<T>* copy() = 0;
 };
 
 template <typename T>
 class unary_generator : public generator
 {
 private:
-    T &generator_storage;
+    T& generator_storage;
     std::function<T(T)> unary_function;
 
 public:
     unary_generator(lazy_sequence<T> *owner, std::function<T(T)> unfunc);
     ~unary_generator() = default;
 
-    T &get_next() override;
+    T& get_next() override;
     bool has_next() override;
 };
 
@@ -36,7 +36,7 @@ public:
     binary_generator(lazy_sequence<T>* onwer, std::function<T(T,T)> binfunc);
     ~binary_generator() = default;
 
-     T& get_next() override;
+    T& get_next() override;
     bool has_next() override;
 };
 
