@@ -9,9 +9,15 @@ ordinary::ordinary(int omega, int number) : omega(omega), number(number)
     }
 }
 
-ordinary::ordinary(const ordinary &other) : omega(other.omega), number(other.number) {}
+ordinary::ordinary(const ordinary& other) : omega(other.omega), number(other.number) {}
 
-ordinary ordinary::operator+(const ordinary &other)
+ordinary::ordinary(const cardinality& length)
+{
+    omega = length.get_aleph_idx();
+    number =  length.get_finite_length();
+}
+
+ordinary ordinary::operator+(const ordinary& other)
 {
     if (this->is_finite())
     {
@@ -25,7 +31,7 @@ ordinary ordinary::operator+(int num)
     return ordinary(omega, number + num);
 }
 
-ordinary ordinary::operator-(const ordinary &other)
+ordinary ordinary::operator-(const ordinary& other)
 {
     return ordinary(omega - other.omega, number - other.number);
 }
@@ -40,9 +46,22 @@ ordinary ordinary::make_from(int num)
     return ordinary(0, num);
 }
 
+ordinary& ordinary::operator=(int num)
+{
+    number = num;
+    return *this;
+}
+
 ordinary& ordinary::operator+=(int num)
 {
     number += num;
+    return *this;
+}
+
+ordinary& ordinary::operator=(const ordinary& other)
+{
+    omega = other.omega;
+    number = other.number;
     return *this;
 }
 
@@ -70,7 +89,7 @@ ordinary& ordinary::operator++()
     return *this;
 }
 
-bool ordinary::operator==(const ordinary &other)
+bool ordinary::operator==(const ordinary& other)
 {
     return omega == other.omega && number == other.number;
 }
@@ -84,7 +103,7 @@ bool ordinary::operator==(int num)
     return false;
 }
 
-bool ordinary::operator!=(const ordinary &other)
+bool ordinary::operator!=(const ordinary& other)
 {
     return omega != other.omega || number != other.number;
 }
@@ -94,7 +113,7 @@ bool ordinary::operator!=(int num)
     return !(*this == num);
 }
 
-bool ordinary::operator<(const ordinary &other)
+bool ordinary::operator<(const ordinary& other)
 {
     if (omega < other.omega)
     {
@@ -116,7 +135,7 @@ bool ordinary::operator<(int num)
     return false;
 }
 
-bool ordinary::operator>(const ordinary &other)
+bool ordinary::operator>(const ordinary& other)
 {
     return !(*this < other) && *this != other;
 }
@@ -126,7 +145,7 @@ bool ordinary::operator>(int num)
     return !(*this < num) && *this != num;
 }
 
-bool ordinary::operator<=(const ordinary &other)
+bool ordinary::operator<=(const ordinary& other)
 {
     return !(*this > other);
 }
@@ -136,7 +155,7 @@ bool ordinary::operator<=(int num)
     return !(*this > num);
 }
 
-bool ordinary::operator>=(const ordinary &other)
+bool ordinary::operator>=(const ordinary& other)
 {
     return !(*this < other);
 }

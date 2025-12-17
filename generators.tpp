@@ -24,6 +24,9 @@ bool unary_generator<T>::has_next()
     return unary_function(generator_storage);
 }
 
+
+
+
 template <typename T>
 binary_generator<T>::binary_generator(lazy_sequence<T> *owner, std::function<T(T, T)> binfunc)
 {
@@ -50,6 +53,9 @@ bool binary_generator<T>::has_next()
 {
     return binary_function(generator_storage.get_first(), generator_storage.get_last());
 }
+
+
+
 
 template <typename T>
 nary_generator<T>::nary_generator(lazy_sequence<T> *owner, int ar, std::function<T(sequence<T> *)> seqfunc)
@@ -78,6 +84,9 @@ bool nary_generator<T>::has_next()
 {
     return this->get_next();
 }
+
+
+
 
 template <typename T>
 skip_generator<T>::skip_generator(lazy_sequence<T> *owner, lazy_sequence<T> *parent, int start_skip, int end_skip)
@@ -132,6 +141,9 @@ bool skip_generator<T>::has_next()
         return (*parent).generator_->has_next();
     }
 }
+
+
+
 
 template <typename T>
 insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other)

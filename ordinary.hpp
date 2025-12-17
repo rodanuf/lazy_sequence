@@ -1,5 +1,7 @@
 #pragma once
 #include <stdexcept>
+#include "cardinality.hpp"
+
 
 class ordinary
 {
@@ -12,6 +14,7 @@ public:
     ordinary();
     ordinary(int omega, int number);
     ordinary(const ordinary& other);
+    ordinary(const cardinality& length);
     ~ordinary() = default;
 
     ordinary operator+(const ordinary& other);
@@ -19,7 +22,9 @@ public:
     ordinary operator-(const ordinary& other);
     ordinary operator++(int);
     ordinary make_from(int num);
+    ordinary& operator=(int num);
     ordinary& operator+=(int num);
+    ordinary& operator=(const ordinary& other);
     ordinary& operator+=(const ordinary& other);
     ordinary& operator-=(const ordinary& other);
     ordinary& operator++();
