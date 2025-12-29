@@ -29,7 +29,7 @@ template <typename T>
 class binary_generator : public generator
 {
 private:
-    sequence<T> generator_storage;
+    array_sequence<T> generator_storage;
     std::function<T(T,T)> binary_function;
 
 public:
@@ -45,7 +45,7 @@ class nary_generator : public generator
 {
 private:
     int arity;
-    sequence<T> generator_storage;
+    array_sequence<T> generator_storage;
     std::function<T(sequence<T> *)> sequence_function;
 
 public:
@@ -81,15 +81,28 @@ class insert_generator : public generator
 private:
     shared_ptr<lazy_sequence<T>> parent;
     shared_ptr<lazy_sequence<T>> other;
-    T &element;
 
 public:
     insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other);
-    insert_generator(shared_ptr<lazy_sequence<T>> parent, T &elem);
     ~insert_generator() = default;
 
-    T &get_element();
     T &get_other_next();
+
+    virtual T &get_next() override;
+    virtual bool has_next() override;
+};
+
+template <typename T>
+class pull_generator : public generator
+{
+private:
+    shared_ptr<lazy_sequence<T>> parent;
+    T& element;
+    ordinary index
+
+public:
+    pull_generator(shared_ptr<lazy_sequence<T>> parent, const T& item, const ordinary& index);
+    ~pull_generator() = default;
 
     virtual T &get_next() override;
     virtual bool has_next() override;

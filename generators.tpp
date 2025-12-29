@@ -7,7 +7,7 @@ unary_generator<T>::unary_generator(lazy_sequence<T> *owner, std::function<T(T)>
     {
         throw std::invalid_argument("Owner is nullptr");
     }
-    generator_storage = (owner->buffer.get())->get_last();
+    generator_storage = (owner->memoized.get())->get_last();
     unary_function = unfunc;
 }
 
@@ -34,8 +34,8 @@ binary_generator<T>::binary_generator(lazy_sequence<T> *owner, std::function<T(T
     {
         throw std::invalid_argument("Owner is nullptr");
     }
-    int last_idx = (owner->buffer.get())->get_length() - 1;
-    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - 1, last_idx));
+    int last_idx = (owner->memoized.get())->get_length() - 1;
+    generator_storage = *((owner->memoized.get())->get_subsequence(last_idx - 1, last_idx));
     binary_function = binfunc;
 }
 
@@ -65,8 +65,8 @@ nary_generator<T>::nary_generator(lazy_sequence<T> *owner, int ar, std::function
         throw std::invalid_argument("Owner is nullptr");
     }
 
-    int last_idx = (owner->buffer.get())->get_length() - 1;
-    generator_storage = *((owner->buffer.get())->get_subsequence(last_idx - arity, last_idx));
+    int last_idx = (owner->memoized.get())->get_length() - 1;
+    generator_storage = *((owner->memoized.get())->get_subsequence(last_idx - arity, last_idx));
     sequence_function = seqfunc;
 }
 
@@ -154,7 +154,7 @@ insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, share
 }
 
 template <typename T>
-insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, T &elem)
+insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem)
 {
     this->parent = parent;
     element = elem;
