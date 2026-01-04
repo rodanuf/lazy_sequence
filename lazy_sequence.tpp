@@ -2,120 +2,6 @@
 #include <stdexcept>
 
 template <typename T>
-lazy_sequence<T>::ls_iterator::ls_iterator()
-{
-    cur_idx = 0;
-}
-
-template <typename T>
-lazy_sequence<T>::ls_iterator::ls_iterator(int index)
-{
-    this->set_idx(idx);
-}
-
-template <typename T>
-lazy_sequence<T>::ls_iterator::ls_iterator(const ordinary& other)
-{
-    this->set_idx(other);
-}
-
-template <typename T>
-lazy_sequence<T>::ls_iterator::ls_iterator(const ls_iterator& other)
-{
-    this->cur_idx = other.cur_idx;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator lazy_sequence<T>::ls_iterator::operator++(int)
-{
-    ls_iterator tmp(*this);
-    this->cur_idx++;
-    return tmp;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator &lazy_sequence<T>::ls_iterator::operator++()
-{
-    cur_idx++;
-    return *this;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator& lazy_sequence<T>::ls_iterator::increment_idx()
-{
-    cur_idx++;
-    return *this;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator& lazy_sequence<T>::ls_iterator::set_idx(int omega, int num)
-{
-    cur_idx.set_omega(omega);
-    cur_idx.set_number(num);
-    return *this;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator& lazy_sequence<T>::ls_iterator::set_idx(const ordinary& idx)
-{
-    cur_idx = idx;
-    return *this;
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator& lazy_sequence<T>::ls_iterator::set_idx(int num)
-{
-    if (idx < 0)
-    {
-        throw std::invalid_argument("Index is negative");
-    }
-    cur_idx = idx;
-    return *this;
-}
-
-template <typename T>
-ordinary& lazy_sequence<T>::ls_iterator::get_index()
-{
-    return cur_idx;
-}
-
-template <typename T>
-const ordinary& lazy_sequence<T>::ls_iterator::get_index() const
-{
-    return cur_idx;
-}
-
-template <typename T>
-bool lazy_sequence<T>::ls_iterator::has_omega()
-{
-    return cur_idx.get_omega();
-}
-
-template <typename T>
-int lazy_sequence<T>::ls_iterator::get_num_part()
-{
-    return cur_idx.get_number();
-}
-
-template <typename T>
-int lazy_sequence<T>::ls_iterator::get_omega_part()
-{
-    return cur_idx.get_omega();
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator lazy_sequence<T>::begin()
-{
-    return ls_iterator();
-}
-
-template <typename T>
-typename lazy_sequence<T>::ls_iterator lazy_sequence<T>::end()
-{
-    return ls_iterator(this->length);
-}
-
-template <typename T>
 lazy_sequence<T>::lazy_sequence() : memoized(nullptr), generator_(nullptr), length() {}
 
 template <typename T>
@@ -149,7 +35,7 @@ lazy_sequence<T>::lazy_sequence(const std::initializer_list<T>& list, std::funct
     }
 
     array_sequence<T>* seq = new array_sequence<T>(list);
-    this->set_memoized(seq);
+    this->set_memoized(seq); // возможна утечка 
     this->set_generator(unary_generator(this, other_generator));
     this->set_length(1, 0);
 }
@@ -288,7 +174,7 @@ T& lazy_sequence<T>::get_last()
 }
 
 template <typename T>
-T& lazy_sequence<T>::get(const ordinary& index)
+T& lazy_sequence<T>::get(const ordinal& index)
 {
     auto it = begin();
     if (index.is_finite())
@@ -323,7 +209,7 @@ T& lazy_sequence<T>::get(const ordinary& index)
 template <typename T>
 T &lazy_sequence<T>::get(int index)
 {
-    return get(ordinary(index));
+    return get(ordinal(index));
 }
 
 template <typename T>
@@ -337,11 +223,11 @@ T& lazy_sequence<T>::reduce(std::function<T(T,T)> func)
 template <typename T>
 lazy_sequence<T>* lazy_sequence<T>::get_subsequence(int startidx, int endidx)
 {
-    return get_subsequence(ordinary(startidx), ordinary(endidx));
+    return get_subsequence(ordinal(startidx), ordinal(endidx));
 }
 
 template <typename T>
-lazy_sequence<T>* lazy_sequence<T>::get_subsequence(ordinary& start_idx, ordinary& end_idx)
+lazy_sequence<T>* lazy_sequence<T>::get_subsequence(ordinal& start_idx, ordinal& end_idx)
 {
     if (start_idx.get_omega() != start_idx.get_omega())
     {
@@ -390,7 +276,7 @@ lazy_sequence<T>* lazy_sequence<T>::where(std::function<bool(T)> func)
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinary index)
+lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinal index)
 {
     lazy_sequence<T>* result = new lazy_sequence();
     result = result->set_generator(new pull_generator(this, item, index));
@@ -402,5 +288,5 @@ lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinary index)
 template <typename T>
 lazy_sequence<T>& lazy_sequence<T>::set(T& item, int index)
 {
-    return set(item, ordinary(index));
+    return set(item, ordinal(index));
 }

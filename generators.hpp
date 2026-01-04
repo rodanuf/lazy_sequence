@@ -98,10 +98,10 @@ class pull_generator : public generator
 private:
     shared_ptr<lazy_sequence<T>> parent;
     T& element;
-    ordinary index
+    ordinal index
 
 public:
-    pull_generator(shared_ptr<lazy_sequence<T>> parent, const T& item, const ordinary& index);
+    pull_generator(shared_ptr<lazy_sequence<T>> parent, const T& item, const ordinal& index);
     ~pull_generator() = default;
 
     virtual T &get_next() override;

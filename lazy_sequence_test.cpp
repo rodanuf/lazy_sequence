@@ -43,7 +43,7 @@ TEST(test_lazy_sequence_iterator_methods, get_index_methods)
     EXPECT_EQ(it.get_num_part(), 7);
     EXPECT_EQ(it.get_omega_part(), 0);
 
-    ordinary &idx_ref = it.get_index();
+    ordinal &idx_ref = it.get_index();
     EXPECT_EQ(idx_ref.get_number(), 7);
 }
 
@@ -153,7 +153,7 @@ TEST(test_lazy_sequence, get_methods)
 TEST(test_lazy_sequence, get_with_ordinary_index)
 {
     lazy_sequence<int> seq = {1, 2, 3, 4, 5};
-    ordinary idx(3);
+    ordinal idx(3);
 
     EXPECT_EQ(seq.get(idx), 4);
 }
@@ -217,8 +217,8 @@ TEST(test_lazy_sequence, get_subsequence_with_ordinary)
 {
     lazy_sequence<int> seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-    ordinary start(2);
-    ordinary end(7);
+    ordinal start(2);
+    ordinal end(7);
 
     lazy_sequence<int> *subseq = seq.get_subsequence(start, end);
 

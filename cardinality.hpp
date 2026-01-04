@@ -1,17 +1,17 @@
 #pragma once
 
-class cardinality
+class cardinal
 {
 private:
     int aleph_idx;
     int finite_length;
     
 public:
-    cardinality();
-    cardinality(int aleph_idx, int finite_length = 0);
-    ~cardinality() = default;
+    cardinal();
+    cardinal(int aleph_idx, int finite_length = 0);
+    ~cardinal() = default;
 
-    cardinality operator+(const cardinality& other);
+    cardinal operator+(const cardinal& other);
 
     int get_aleph_idx();
     const int get_aleph_idx() const;
