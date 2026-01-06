@@ -28,16 +28,17 @@ public:
 
     lazy_sequence();
     lazy_sequence(T* items, int size);
-    lazy_sequence(const std::initializer_list<T>& list); 
+    lazy_sequence(const std::initializer_list<T>& list, generator<T>* gen = nullptr); 
     lazy_sequence(sequence<T>* seq, generator<T>* gen = nullptr);
+    lazy_sequence(const lazy_sequence<T>& other);
     ~lazy_sequence();
 
     // по константной ссылке
-    T& get_first();
-    T& get_last_memoized();
-    T& get(const ordinal& index);
-    T& get(int index);
-    T& reduce(std::function<T(T, T)> func);
+    const T& get_first() const;
+    const T& get_last_memoized() const;
+    const T& get(const ordinal& index) const;
+    const T& get(int index) const;
+    const T& reduce(std::function<T(T, T)> func) const;
 
     lazy_sequence<T>* get_subsequence(int startidx, int endidx);
     lazy_sequence<T>* get_subsequence(ordinal& start_idx, ordinal& end_idx);
@@ -49,18 +50,17 @@ public:
 
     lazy_sequence<T>& set(T& item, ordinal index);
     lazy_sequence<T>& set(T& item, int index);
-    lazy_sequence<T>& set_first();
-    lazy_sequence<T>& set_last();
+    lazy_sequence<T>& set_first(T& item);
+    lazy_sequence<T>& set_last(T& item);
 
 private:
     lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);
 
-    generator* get_generator();
+    generator<T>* get_generator();
     shared_ptr<array_sequence<T>> get_memoized();
     cardinal get_length();
 
-    lazy_sequence<T>& set_generator(generator<T> *generator);
-    lazy_sequence<T>& set_generator(generator<T> *generator, int arity);
+    lazy_sequence<T>& set_generator(generator<T>* generator);
     lazy_sequence<T>& set_memoized(shared_ptr<array_sequence<T>> memoized);
     lazy_sequence<T>& set_length(cardinal length);
 };

@@ -183,3 +183,15 @@ bool insert_generator<T>::has_next()
 {
     return (*parent).generator_.has_next();
 }
+
+
+
+
+template <typename T>
+filter_generator<T>::filter_generator(shared_ptr<lazy_sequence<T>> parent, std::function<bool(T)> filter_function)
+{
+    this->parent = parent;
+    this->filter_function = filter_function;
+}
+
+template <typename T>

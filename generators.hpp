@@ -7,6 +7,7 @@ class generator
 public:
     virtual T &get_next() = 0;
     virtual bool has_next() = 0;
+    virtual optional<T> try_get_next() = 0;
     virtual generator<T>* copy() = 0;
 };
 
@@ -88,9 +89,25 @@ public:
 
     T &get_other_next();
 
-    virtual T &get_next() override;
-    virtual bool has_next() override;
+    T &get_next() override;
+    bool has_next() override;
 };
+
+template <typename T>
+class filter_generator : public 
+{
+private:
+    shared_ptr<lazy_sequence<T>> parent;
+    std::function<bool(T)> filter_function;
+
+public:
+    filter_generator(shared_ptr<lazy_sequence<T>> parent, std::function<bool(T)> filter_funcion);
+    ~filter_generator() = default;
+
+    T& get_next() override;
+    bool has_next() override;
+    optional<T> try_get_next() override;
+}
 
 template <typename T>
 class pull_generator : public generator

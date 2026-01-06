@@ -86,13 +86,3 @@ int counter::get_omega_part()
 {
     return cur_idx.get_omega();
 }
-
-counter begin()
-{
-    return counter();
-}
-
-counter end()
-{
-    return counter(this->length);
-}

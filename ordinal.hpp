@@ -1,20 +1,24 @@
 #pragma once
 #include <stdexcept>
-#include "cardinality.hpp"
+#include "cardinal.hpp"
+#include "term.hpp"
+#include "../lab3_2ndsem/headers/array_sequence.hpp"
 
 
 class ordinal
 {
+public:
+    using cantor_form = array_sequence<term>;
+
 private:
-    int omega;
-    int number;
-    bool is_omega_square = false;
+    cantor_form form;
+    int numerical_part = 0;
 
 public:
     ordinal();
-    ordinal(int omega, int number);
+    ordinal(int number);
+    ordinal(const cantor_form& other);
     ordinal(const ordinal& other);
-    ordinal(const cardinal& length);
     ~ordinal() = default;
 
     ordinal operator+(const ordinal& other);
@@ -43,6 +47,8 @@ public:
     bool operator>=(int num);
     bool is_finite();
 
+    const cantor_form& get_form() const;
+
     int get_omega();
     const int get_omega() const;
     int get_number();
@@ -52,4 +58,7 @@ public:
     void increase_omega();
     void set_number(int number);
     void increase_number();
+
+private:
+    cantor_form& get_form();
 };

@@ -1,34 +1,52 @@
 #include "ordinal.hpp"
 
-ordinal::ordinal() : omega(0), number(0) {}
-ordinal::ordinal(int omega, int number) : omega(omega), number(number)
+ordinal::ordinal() : form(), numerical_part(0) {}
+ordinal::ordinal(int number)
 {
-    if (omega < 0 || number < 0)
+    if (number < 0)
     {
         throw std::invalid_argument("Invalid arguments");
     }
+
+    form.append_element(term(number, 0));
+    numerical_part = number;
 }
 
-ordinal::ordinal(const ordinal& other) : omega(other.omega), number(other.number) {}
-
-ordinal::ordinal(const cardinal& length)
+ordinal::ordinal(const cantor_form& other)
 {
-    omega = length.get_aleph_idx();
-    number =  length.get_finite_length();
+    form = other;
+    numerical_part = form.get_last().get_coefficient();
 }
+
+ordinal::ordinal(const ordinal& other) : form(other.form), numerical_part(other.numerical_part) {}
 
 ordinal ordinal::operator+(const ordinal& other)
 {
-    if (this->is_finite())
+    if (other > *this)
     {
-        return ordinal(omega, number + other.number);
+        return ordinal(other);
     }
-    return ordinal(omega + other.omega, other.number);
+    cantor_form buffer_form = this->get_form();
+    cantor_form other_buffer_form = other.get_form();
+    for (int i = 0; i < buffer_form.get_length(); i++)
+    {
+        if (other_buffer_form.get(i).get_exponent() == buffer_form.get(buffer_form.get_length() - i).get_exponent())
+        {
+            buffer_form.get(buffer_form.get_length() - i).set_coefficient(other_buffer_form.get(i).get_coefficient() + this->get_form().get(i).get_coefficient());
+        }
+        if (other_buffer_form.get(i).get_exponent() > buffer_form.get(buffer_form.get_length() - i).get_exponent())
+        {
+            buffer_form.insert_element(other_buffer_form.get(i));
+        }
+    }
+    return ordinal(buffer_form); 
 }
 
 ordinal ordinal::operator+(int num)
 {
-    return ordinal(omega, number + num);
+    cantor_form buffer_form = this->get_form();
+    buffer_form.get_last() += num;
+    return ordinal(buffer_form);
 }
 
 ordinal ordinal::operator-(const ordinal& other)
