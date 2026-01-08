@@ -5,7 +5,7 @@ class optional
 {
 private:
     bool has_value;
-    union storage
+    union storage // выкинуть конструктор и деструктор и посмотреть что будет
     {
         T value;
         constexpr storage() noexcept {}

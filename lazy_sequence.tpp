@@ -182,7 +182,7 @@ lazy_sequence<T>* lazy_sequence<T>::where(std::function<bool(T)> func)
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinal index)
+lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinal index) // const T& item везде + const ordinal& index тоже везде 
 {
     lazy_sequence<T>* result = new lazy_sequence();
     result = result->set_generator(new pull_generator(this, item, index));

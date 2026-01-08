@@ -22,23 +22,21 @@ ordinal::ordinal(const ordinal& other) : form(other.form), numerical_part(other.
 
 ordinal ordinal::operator+(const ordinal& other)
 {
-    if (other > *this)
+    if (*this < other)
     {
         return ordinal(other);
     }
     cantor_form buffer_form = this->get_form();
     cantor_form other_buffer_form = other.get_form();
-    for (int i = 0; i < buffer_form.get_length(); i++)
+    int index = (*this).find_index(other.get_leading_term());
+    for (int i = (*this).get_form().get_length() - 1; i > index; i--)
     {
-        if (other_buffer_form.get(i).get_exponent() == buffer_form.get(buffer_form.get_length() - i).get_exponent())
-        {
-            buffer_form.get(buffer_form.get_length() - i).set_coefficient(other_buffer_form.get(i).get_coefficient() + this->get_form().get(i).get_coefficient());
-        }
-        if (other_buffer_form.get(i).get_exponent() > buffer_form.get(buffer_form.get_length() - i).get_exponent())
-        {
-            buffer_form.insert_element(other_buffer_form.get(i));
-        }
+        buffer_form.remove_at(buffer_form.get_length() - 1);
     }
+
+    buffer_form.get(index).set_coefficient((*this).get_form().get(index).get_coefficient() + other.get_leading_term().get_coefficient());
+    other_buffer_form.remove_at(0);
+    buffer_form.concat(other_buffer_form);
     return ordinal(buffer_form); 
 }
 
@@ -51,79 +49,206 @@ ordinal ordinal::operator+(int num)
 
 ordinal ordinal::operator-(const ordinal& other)
 {
-    return ordinal(omega - other.omega, number - other.number);
+    if (*this < other)
+    {
+        throw std::invalid_argument("Right operand must be less than left operand");
+    }
+    if (other.get_leading_term().get_exponent() < (*this).get_leading_term().get_exponent())
+    {
+        return ordinal(this->get_form());
+    }
+
+    cantor_form buffer_form = this->get_form();
+    cantor_form other_buffer_form = other.get_form();
+    for (int i = buffer_form.get_length() - 1; i > 0; i--)
+    {
+        buffer_form.get(i).set_coefficient((*this).get_form().get(i).get_coefficient() - other_buffer_form.get(i).get_coefficient());
+    }
+
+    ordinal difference = ordinal(buffer_form);
+    if (!(difference.is_finite()))
+    {
+        difference.get_form().get(buffer_form.get_length() - 1).set_coefficient(buffer_form.get_last().get_coefficient() - other_buffer_form.get_last().get_coefficient()); 
+    }
+
+    return difference;
+}
+
+ordinal ordinal::operator-(int num)
+{
+    return *this - ordinal(num);
+}
+
+ordinal ordinal::operator*(const ordinal& other)
+{
+    cantor_form buffer_form = (*this).get_form();
+    cantor_form other_buffer_form = other.get_form();
+    ordinal result;
+
+    for (int i = 0; i < buffer_form.get_length(); i++)
+    {
+        for (int j = 0; j < other_buffer_form.get_length(); j++)
+        {
+            int coeff = buffer_form[i].get_coefficient() * other_buffer_form[j].get_coefficient();
+            int exp;
+            exp = buffer_form[i].get_exponent() + other_buffer_form[j].get_exponent();
+
+            bool has_same_exponent = false;
+            for (int k = 0; k < result.get_form().get_length(); k++)
+            {
+                if (result[k].get_exponent() == exp)
+                {
+                    result[k].get_coefficient() += coeff;
+                    has_same_exponent = true;
+                }
+            }
+
+            if (!has_same_exponent)
+            {
+                result.get_form().append_element(term(coeff, exp));
+            }
+        }
+    }
+
+    return result;
+}
+
+ordinal ordinal::operator*(int num)
+{
+    return ordinal((*this) * ordinal(num));
 }
 
 ordinal ordinal::operator++(int)
 {
-    return ordinal(omega, number++);
+    ordinal result(*this);
+    ++(*this);
+    return result;
 }
 
-ordinal ordinal::make_from(int num)
+ordinal &ordinal::operator=(int num)
 {
-    return ordinal(0, num);
-}
-
-ordinal& ordinal::operator=(int num)
-{
-    number = num;
+    this->get_form().clear();
+    this->get_form().append_element(term(num, 0));
+    this->numerical_part = num;
     return *this;
 }
 
-ordinal& ordinal::operator+=(int num)
+ordinal &ordinal::operator+=(int num)
 {
-    number += num;
+    this->get_form().get_last() += num;
+    this->numerical_part += num;
     return *this;
 }
 
-ordinal& ordinal::operator=(const ordinal& other)
+ordinal &ordinal::operator=(const ordinal &other)
 {
-    omega = other.omega;
-    number = other.number;
+    this->get_form() = other.get_form();
+    this->numerical_part = other.numerical_part;
     return *this;
 }
 
-ordinal& ordinal::operator+=(const ordinal& other)
-{
-    omega += other.omega;
-    number += other.number;
-    return *this;
-}
-
-ordinal& ordinal::operator-=(const ordinal& other)
+ordinal &ordinal::operator+=(const ordinal &other)
 {
     if (*this < other)
     {
-        throw std::invalid_argument("Invalid arguments");
+        *this = other;
+        return *this;
     }
-    omega -= other.omega;
-    number -= other.number;
+    cantor_form buffer_form = this->get_form();
+    cantor_form other_buffer_form = other.get_form();
+    int index = (*this).find_index(other.get_leading_term());
+    for (int i = buffer_form.get_length() - 1; i > index; i--)
+    {
+        (*this).get_form().remove_at((*this).get_form().get_length() - 1);
+    }
+
+    (*this).get_term(index).set_coefficient((*this).get_form().get(index).get_coefficient() + other.get_leading_term().get_coefficient());
+    other_buffer_form.remove_at(0);
+    (*this).get_form().concat(other_buffer_form);
     return *this;
 }
 
-ordinal& ordinal::operator++()
+ordinal &ordinal::operator-=(const ordinal &other)
 {
-    number++;
+    if (*this < other)
+    {
+throw std::invalid_argument("Right operand must be less than left operand");
+    }
+    if (other.get_leading_term().get_exponent() < (*this).get_leading_term().get_exponent())
+    {
+return *this;
+    }
+
+    cantor_form buffer_form = this->get_form();
+    cantor_form other_buffer_form = other.get_form();
+    for (int i = buffer_form.get_length() - 1; i > 0; i--)
+    {
+        buffer_form.get(i).set_coefficient((*this).get_form().get(i).get_coefficient() - other_buffer_form.get(i).get_coefficient());
+    }
+
+    ordinal result = ordinal(buffer_form);
+    if (!(result.is_finite()))
+    {
+        result.get_form().get(buffer_form.get_length() - 1).set_coefficient(buffer_form.get_last().get_coefficient() - other_buffer_form.get_last().get_coefficient());
+    }
+
+    *this = result;
     return *this;
 }
 
-bool ordinal::operator==(const ordinal& other)
+ordinal &ordinal::operator++()
 {
-    return omega == other.omega && number == other.number;
+    this->get_form().get_last()++;
+    numerical_part++;
+    return *this;
+}
+
+ordinal &ordinal::add_term(const term &t)
+{
+    int i = (*this).get_form().get_length() - 1;
+    while ((*this).get_term(i) >= t)
+    {
+        if (t.get_coefficient() == (*this).get_term(i).get_coefficient())
+        {
+            this->get_form().insert_element((*this).get_term(i) += t, i);
+            return *this;
+        }
+        i--;
+    }
+    this->get_form().insert_element(t, i);
+    return *this;
+}
+
+bool ordinal::operator==(const ordinal &other)
+{
+    if ((*this).get_form().get_length() != other.get_form().get_length())
+    {
+        return false;
+    }
+
+    for (int i = 0; i < (*this).get_form().get_length(); i++)
+    {
+        if ((*this).get_form().get(i) != other.get_form().get(i))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool ordinal::operator==(int num)
 {
-    if (omega == 0)
+    if ((*this).is_finite())
     {
-        return number == num;
+return numerical_part == num;
     }
     return false;
 }
 
-bool ordinal::operator!=(const ordinal& other)
+bool ordinal::operator!=(const ordinal &other)
 {
-    return omega != other.omega || number != other.number;
+    return !(*this == other);
 }
 
 bool ordinal::operator!=(int num)
@@ -131,29 +256,38 @@ bool ordinal::operator!=(int num)
     return !(*this == num);
 }
 
-bool ordinal::operator<(const ordinal& other)
+bool ordinal::operator<(const ordinal &other)
 {
-    if (omega < other.omega)
+    if ((*this).get_leading_term() < other.get_leading_term())
     {
         return true;
     }
-    else if (omega == other.omega)
+    else if ((*this) == other)
     {
-        return number < other.number;
+        return false;
     }
-    return false;
+
+    for (int i = 0; i < ((*this).get_form().get_length() < other.get_form().get_length() ? (*this).get_form().get_length() : other.get_form().get_length()); i++)
+    {
+        if ((*this).get_form().get(i) > other.get_form().get(i))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool ordinal::operator<(int num)
 {
-    if (omega == 0)
+    if ((*this).is_finite())
     {
-        return number < num;
+        return (*this).get_form().get_last() < term(num, 0);
     }
     return false;
 }
 
-bool ordinal::operator>(const ordinal& other)
+bool ordinal::operator>(const ordinal &other)
 {
     return !(*this < other) && *this != other;
 }
@@ -163,7 +297,7 @@ bool ordinal::operator>(int num)
     return !(*this < num) && *this != num;
 }
 
-bool ordinal::operator<=(const ordinal& other)
+bool ordinal::operator<=(const ordinal &other)
 {
     return !(*this > other);
 }
@@ -173,7 +307,7 @@ bool ordinal::operator<=(int num)
     return !(*this > num);
 }
 
-bool ordinal::operator>=(const ordinal& other)
+bool ordinal::operator>=(const ordinal &other)
 {
     return !(*this < other);
 }
@@ -183,55 +317,66 @@ bool ordinal::operator>=(int num)
     return !(*this < num);
 }
 
-bool ordinal::is_finite()
+bool ordinal::is_finite() const
 {
-    return number && omega;
-}
-
-int ordinal::get_omega()
-{
-    return omega;
-}
-
-const int ordinal::get_omega() const
-{
-    return omega;
-}
-
-int ordinal::get_number()
-{
-    return number;
-}
-
-const int ordinal::get_number() const
-{
-    return number;
-}
-
-void ordinal::set_omega(int omega)
-{
-    if (omega < 0)
+    for (int i = 0; i < form.get_length(); i++)
     {
-        throw std::invalid_argument("Invalid arguments");
+        if (form.get(i).get_exponent() != 0)
+        {
+            return false;
+        }
     }
-    this->omega = omega;
+
+    return true;
 }
 
-void ordinal::increase_omega()
+const ordinal::cantor_form &ordinal::get_form() const
 {
-    omega++;
+    return form;
 }
 
-void ordinal::set_number(int number)
+const term &ordinal::operator[](int index) const
 {
-    if (number < 0)
+    return form[index];
+}
+
+const term &ordinal::get_leading_term() const
+{
+    return form.get(0);
+}
+
+const term &ordinal::get_term(int index) const
+{
+    return form.get(index);
+}
+
+int ordinal::find_index(const term &t)
+{
+    int index = 0;
+    while (form.get(index) >= t)
     {
-        throw std::invalid_argument("Invalid arguments");
+        index++;
     }
-    this->number = number;
+
+    return index;
 }
 
-void ordinal::increase_number()
+ordinal::cantor_form &ordinal::get_form()
 {
-    number++;
+    return form;
+}
+
+term &ordinal::operator[](int index)
+{
+    return form[index];
+}
+
+term &ordinal::get_leading_term()
+{
+    return form.get(0);
+}
+
+term &ordinal::get_term(int index)
+{
+    return form.get(index);
 }

@@ -24,14 +24,18 @@ public:
     ordinal operator+(const ordinal& other);
     ordinal operator+(int num);
     ordinal operator-(const ordinal& other);
+    ordinal operator-(int num);
+    ordinal operator*(const ordinal& other);
+    ordinal operator*(int num);
     ordinal operator++(int);
-    ordinal make_from(int num);
     ordinal& operator=(int num);
     ordinal& operator+=(int num);
     ordinal& operator=(const ordinal& other);
     ordinal& operator+=(const ordinal& other);
     ordinal& operator-=(const ordinal& other);
     ordinal& operator++();
+
+    ordinal& add_term(const term& t);
 
     bool operator==(const ordinal& other);
     bool operator==(int num);
@@ -45,20 +49,22 @@ public:
     bool operator<=(int num);
     bool operator>=(const ordinal& other);
     bool operator>=(int num);
-    bool is_finite();
+    bool is_finite() const;
 
     const cantor_form& get_form() const;
 
-    int get_omega();
-    const int get_omega() const;
-    int get_number();
-    const int get_number() const;
+    const term& operator[](int index) const;
+    const term& get_leading_term() const;
+    const term& get_term(int index) const;
 
-    void set_omega(int omega);
-    void increase_omega();
-    void set_number(int number);
-    void increase_number();
+    term& operator[](int index);
+
+    int find_index(const term& t);
 
 private:
     cantor_form& get_form();
+
+    term& get_leading_term();
+    term& get_term(int index);
+
 };

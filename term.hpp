@@ -11,6 +11,8 @@ public:
     term(const term& other);
     ~term() = default;
 
+    term operator++(int);
+
     term& operator=(const term& other);
     term& operator+=(const term& other);
     term& operator+=(int num);
@@ -24,6 +26,8 @@ public:
     bool operator<=(const term& other);
     bool operator>=(const term& other);
 
-    int get_coefficient();
-    int get_exponent();
+    int& get_coefficient();
+    int& get_exponent();
+    const int& get_coefficient() const; 
+    const int& get_exponent() const;
 };
