@@ -18,6 +18,7 @@ public:
     ordinal();
     ordinal(int number);
     ordinal(const cantor_form& other);
+    ordinal(const term& other);
     ordinal(const ordinal& other);
     ~ordinal() = default;
 
@@ -60,6 +61,7 @@ public:
     term& operator[](int index);
 
     int find_index(const term& t);
+    int get_numerical_part() const;
 
 private:
     cantor_form& get_form();

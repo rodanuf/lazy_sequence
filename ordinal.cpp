@@ -361,6 +361,11 @@ int ordinal::find_index(const term &t)
     return index;
 }
 
+int ordinal::get_numerical_part() const
+{
+    return numerical_part;
+}
+
 ordinal::cantor_form &ordinal::get_form()
 {
     return form;
