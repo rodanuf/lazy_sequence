@@ -14,7 +14,7 @@ counter lazy_sequence<T>::end()
 }
 
 template <typename T>
-lazy_sequence<T>::lazy_sequence() : memoized(nullptr), generator_(nullptr), length() {}
+lazy_sequence<T>::lazy_sequence() : memoized(nullptr), gen(nullptr), length() {}
 
 template <typename T>
 lazy_sequence<T>::lazy_sequence(T* items, int size)
@@ -64,7 +64,7 @@ template <typename T>
 lazy_sequence<T>::~lazy_sequence()
 {
     memoized.~shared_ptr();
-    delete generator_;
+    delete gen;
 }
 
 template <typename T>
@@ -89,7 +89,7 @@ const T& lazy_sequence<T>::get(const ordinal& index) const
         while (it != index)
         {
             it++;
-            (*memoized).insert_element(this->generator_->get_next(), (*iterator).get_index());
+            (*memoized).insert_element(this->gen->get_next(), it.get_index());
         }
     }
     if (!(index.is_finite()))
@@ -104,9 +104,9 @@ const T& lazy_sequence<T>::get(const ordinal& index) const
             it++;
             if (it == index.get_number())
             {
-                return this->generator_->get_next_other();
+                return this->gen->get_next_other();
             }
-            this->generator_->get_next_other();
+            this->gen->get_next_other();
         }
     }
     return (*memoized).get_element(index);
@@ -133,7 +133,7 @@ lazy_sequence<T>* lazy_sequence<T>::get_subsequence(int startidx, int endidx)
 }
 
 template <typename T>
-lazy_sequence<T>* lazy_sequence<T>::get_subsequence(ordinal& start_idx, ordinal& end_idx)
+lazy_sequence<T>* lazy_sequence<T>::get_subsequence(const ordinal& start_idx, const ordinal& end_idx)
 {
     if (start_idx.get_omega() != start_idx.get_omega())
     {
@@ -145,7 +145,7 @@ lazy_sequence<T>* lazy_sequence<T>::get_subsequence(ordinal& start_idx, ordinal&
         other->append_element(this->get(start_idx));
         start_idx++;
     }   
-    lazy_sequence<T>* result = new lazy_sequence(other, generator_);
+    lazy_sequence<T>* result = new lazy_sequence(other, gen);
     return result;
 }
 
@@ -182,29 +182,29 @@ lazy_sequence<T>* lazy_sequence<T>::where(std::function<bool(T)> func)
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set(T& item, ordinal index) // const T& item везде + const ordinal& index тоже везде 
+lazy_sequence<T>& lazy_sequence<T>::set(const T& item, const ordinal& index) // const T& item везде + const ordinal& index тоже везде 
 {
     lazy_sequence<T>* result = new lazy_sequence();
-    result = result->set_generator(new pull_generator(this, item, index));
-    result = result->set_memoized(this->memoized);
-    result = result->set_length(this->length);
+    result->set_generator(new pull_generator(this, item, index));
+    result->set_memoized(this->memoized);
+    result->set_length(this->length);
     return result;
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set(T& item, int index)
+lazy_sequence<T>& lazy_sequence<T>::set(const T& item, int index)
 {
     return set(item, ordinal(index));
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set_first(T& item)
+lazy_sequence<T>& lazy_sequence<T>::set_first(const T& item)
 {
     return set(item, ordinal(0));
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set_last(T& item)
+lazy_sequence<T>& lazy_sequence<T>::set_last(const T& item)
 {
     return set(item, ordinal(this->get_length() - 1));
 }
@@ -212,7 +212,7 @@ lazy_sequence<T>& lazy_sequence<T>::set_last(T& item)
 template <typename T>
 generator<T>* lazy_sequence<T>::get_generator()
 {
-    return this->generator_;
+    return this->gen;
 }
 
 template <typename T>
@@ -228,9 +228,9 @@ cardinal lazy_sequence<T>::get_length()
 }
 
 template <typename T>
-lazy_sequence<T>& lazy_sequence<T>::set_generator(generator<T>* generator)
+lazy_sequence<T>& lazy_sequence<T>::set_generator(generator<T>* gen)
 {
-    this->generator_ = generator;
+    this->gen = gen;
 }
 
 template <typename T>

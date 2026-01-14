@@ -94,7 +94,7 @@ public:
 };
 
 template <typename T>
-class filter_generator : public 
+class filter_generator : public generator
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
@@ -107,7 +107,7 @@ public:
     T& get_next() override;
     bool has_next() override;
     optional<T> try_get_next() override;
-}
+};
 
 template <typename T>
 class pull_generator : public generator

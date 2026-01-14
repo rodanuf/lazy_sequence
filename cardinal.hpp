@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 
 class cardinal
 {
@@ -12,6 +13,8 @@ public:
     ~cardinal() = default;
 
     cardinal operator+(const cardinal& other);
+
+    cardinal& operator+=(const cardinal& other);
 
     int get_aleph_idx();
     const int get_aleph_idx() const;

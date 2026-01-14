@@ -112,7 +112,7 @@ void skip_generator<T>::skip()
     }
     for (int i = start_idx; i <= end_idx; i++)
     {
-        (*parent).generator_->get_next();
+        (*parent).gen->get_next();
     }
     start_idx = 0;
     end_idx = 0;
@@ -130,7 +130,7 @@ template <typename T>
 T& skip_generator<T>::get_next()
 {
     skip();
-    return (*parent).generator_->get_next();
+    return (*parent).gen->get_next();
 }
 
 template <typename T>
@@ -138,7 +138,7 @@ bool skip_generator<T>::has_next()
 {
     if (start_idx == end_idx)
     {
-        return (*parent).generator_->has_next();
+        return (*parent).gen->has_next();
     }
 }
 
@@ -169,19 +169,19 @@ T& insert_generator<T>::get_element()
 template <typename T>
 T& insert_generator<T>::get_other_next()
 {
-    return (*other).generator_->get_next();
+    return (*other).gen->get_next();
 }
 
 template <typename T>
 T& insert_generator<T>::get_next()
 {
-    return (*parent).generator_.get_next();
+    return (*parent).gen.get_next();
 }
 
 template <typename T>
 bool insert_generator<T>::has_next()
 {
-    return (*parent).generator_.has_next();
+    return (*parent).gen.has_next();
 }
 
 
