@@ -2,7 +2,7 @@
 #include "ordinal.hpp"
 #include "pointers/uniq_ptr.hpp"
 
-class counter // переименовать, так как это счётчик, а не итератор, счётчик вынести
+class counter
 {
 private:
     uniq_ptr<ordinal> cur_idx;

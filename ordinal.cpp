@@ -12,10 +12,26 @@ ordinal::ordinal(int number)
     numerical_part = number;
 }
 
+ordinal::ordinal(const std::initializer_list<term>& list) : form(list)
+{
+    this->normalize();
+    numerical_part = form.get_last().get_coefficient();
+}
+
 ordinal::ordinal(const cantor_form& other)
 {
     form = other;
     numerical_part = form.get_last().get_coefficient();
+}
+
+ordinal::ordinal(const term& other)
+{
+    form.append_element(other);
+    numerical_part = 0;
+    if (this->is_finite())
+    {
+        numerical_part = other.get_coefficient();
+    }
 }
 
 ordinal::ordinal(const ordinal& other) : form(other.form), numerical_part(other.numerical_part) {}
@@ -172,11 +188,11 @@ ordinal &ordinal::operator-=(const ordinal &other)
 {
     if (*this < other)
     {
-throw std::invalid_argument("Right operand must be less than left operand");
+        throw std::invalid_argument("Right operand must be less than left operand");
     }
     if (other.get_leading_term().get_exponent() < (*this).get_leading_term().get_exponent())
     {
-return *this;
+        return *this;
     }
 
     cantor_form buffer_form = this->get_form();
@@ -205,6 +221,10 @@ ordinal &ordinal::operator++()
 
 ordinal &ordinal::add_term(const term &t)
 {
+    if (t.get_coefficient() == 0 || t.get_exponent() < 0)
+    {
+        throw std::invalid_argument("Invalid arguments");
+    }
     int i = (*this).get_form().get_length() - 1;
     while ((*this).get_term(i) >= t)
     {
@@ -218,6 +238,66 @@ ordinal &ordinal::add_term(const term &t)
     this->get_form().insert_element(t, i);
     return *this;
 }
+
+ordinal &ordinal::normalize()
+{
+    int length = form.get_length();
+    for (int i = length/2 - 1; length >= 0; length--)
+    {
+        while (true)
+        {
+            int smallest = i;
+            int left = 2*i + 1;
+            int right = 2*i + 2;
+            if (left < length && form.get(left) < form.get(smallest))
+            {
+                smallest = left;
+            }
+            if (right < length && form.get(right) < form.get(smallest))
+            {
+                smallest = right;
+            }
+            if (smallest == i)
+            {
+                break;
+            }
+
+            term buffer = form[i];
+            form[i] = form[smallest];
+            form[smallest] = buffer;
+            i = smallest;
+        }
+    } 
+    for (int i = length - 1; i > 0; i--)
+    {
+        term buffer = form[0];
+        form[0] = form[i];
+        form[i] = buffer;
+        while (true)
+        {
+            int smallest = i;
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+            if (left < length && form.get(left) < form.get(smallest))
+            {
+                smallest = left;
+            }
+            if (right < length && form.get(right) < form.get(smallest))
+            {
+                smallest = right;
+            }
+            if (smallest == i)
+            {
+                break;
+            }
+
+            term buffer = form[i];
+            form[i] = form[smallest];
+            form[smallest] = buffer;
+            i = smallest;
+        }
+    }
+} 
 
 bool ordinal::operator==(const ordinal &other)
 {

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdexcept>
+#include <initializer_list>
 #include "cardinal.hpp"
 #include "term.hpp"
 #include "../lab3_2ndsem/headers/array_sequence.hpp"
@@ -17,6 +18,7 @@ private:
 public:
     ordinal();
     ordinal(int number);
+    ordinal(const std::initializer_list<term>& list);
     ordinal(const cantor_form& other);
     ordinal(const term& other);
     ordinal(const ordinal& other);
@@ -37,6 +39,7 @@ public:
     ordinal& operator++();
 
     ordinal& add_term(const term& t);
+    ordinal& normalize();
 
     bool operator==(const ordinal& other);
     bool operator==(int num);

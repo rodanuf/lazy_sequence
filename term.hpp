@@ -19,7 +19,7 @@ public:
     term& set_coefficient(int coefficient);
     term& set_exponent(int exponent);
 
-    bool operator==(const term& other);
+    bool operator==(const term& other) const;
     bool operator!=(const term& other);
     bool operator<(const term& other);
     bool operator>(const term& other);
