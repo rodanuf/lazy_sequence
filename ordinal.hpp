@@ -3,7 +3,7 @@
 #include <initializer_list>
 #include "cardinal.hpp"
 #include "term.hpp"
-#include "../lab3_2ndsem/headers/array_sequence.hpp"
+#include "lab3_2ndsem/headers/array_sequence.hpp"
 
 
 class ordinal
@@ -41,8 +41,8 @@ public:
     ordinal& add_term(const term& t);
     ordinal& normalize();
 
-    bool operator==(const ordinal& other);
-    bool operator==(int num);
+    bool operator==(const ordinal& other) const;
+    bool operator==(int num) const;
     bool operator!=(const ordinal& other);
     bool operator!=(int num);
     bool operator<(const ordinal& other);
@@ -71,5 +71,7 @@ private:
 
     term& get_leading_term();
     term& get_term(int index);
+
+    ordinal& set_num(int num);
 
 };

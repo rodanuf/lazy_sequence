@@ -5,11 +5,11 @@ class optional
 {
 private:
     bool has_value;
-    union storage // выкинуть конструктор и деструктор и посмотреть что будет
+    union storage_union
     {
         T value;
-        constexpr storage() noexcept {}
-        ~storage() {}
+        constexpr storage_union() noexcept {}
+        ~storage_union() {}
     } storage;
 
 public:

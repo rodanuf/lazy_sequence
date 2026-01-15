@@ -2,11 +2,11 @@
 
 #include <functional>
 #include <initializer_list>
-#include "../pointers/weak_ptr.hpp"
-#include "../pointers/shared_ptr.hpp"
-#include "../lab3_2ndsem/headers/sequence.hpp"
-#include "../lab3_2ndsem/headers/array_sequence.hpp"
-#include "../lab3_2ndsem/monad_header/monad_adapter.hpp"
+#include "pointers/weak_ptr.hpp"
+#include "pointers/shared_ptr.hpp"
+#include "lab3_2ndsem/headers/sequence.hpp"
+#include "lab3_2ndsem/headers/array_sequence.hpp"
+#include "lab3_2ndsem/monad_header/monad_adapter.hpp"
 #include "counter.hpp"
 #include "generators.hpp"
 #include "ordinal.hpp" 
@@ -43,7 +43,7 @@ public:
     lazy_sequence<T>* get_subsequence(const ordinal& start_idx, const ordinal& end_idx);
     lazy_sequence<T>* concat(lazy_sequence<T>* other);
     template <typename T2>
-    lazy_sequence<T>* map(std::function<T2(T)> func);
+    lazy_sequence<T2>* map(std::function<T2(T)> func);
     lazy_sequence<T>* where(std::function<bool(T)> func);
     lazy_sequence<T>* zip(sequence<T>* seq);
 

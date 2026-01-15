@@ -9,6 +9,8 @@ term::term(int coefficient, int exponent)
     {
         throw std::invalid_argument("Coefficient or exponent is negative");
     }
+    this->coefficient = coefficient;
+    this->exponent = exponent;
 }
 
 term::term(const term& other)
@@ -65,7 +67,7 @@ term& term::set_exponent(int exponent)
     return *this;
 }
 
-bool term::operator==(const term& other)
+bool term::operator==(const term& other) const
 {
     if (coefficient == other.coefficient && exponent == other.exponent)
     {
@@ -74,7 +76,7 @@ bool term::operator==(const term& other)
     return false;
 }
 
-bool term::operator!=(const term& other)
+bool term::operator!=(const term& other) const
 {
     return !(*this == other);
 }

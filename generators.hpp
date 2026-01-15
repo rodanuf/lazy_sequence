@@ -1,5 +1,13 @@
 #pragma once
-#include "lazy_sequence.hpp"
+#include <functional>
+#include "pointers/uniq_ptr.hpp"
+#include "pointers/shared_ptr.hpp"
+#include "optional.hpp"
+
+// Forward declarations
+template <typename T> class lazy_sequence;
+template <typename T> class array_sequence;
+template <typename T> class sequence;
 
 template <typename T>
 class generator
@@ -12,10 +20,10 @@ public:
 };
 
 template <typename T>
-class unary_generator : public generator
+class unary_generator : public generator<T>
 {
 private:
-    T& generator_storage;
+    T generator_storage;
     std::function<T(T)> unary_function;
 
 public:
@@ -27,7 +35,7 @@ public:
 };
 
 template <typename T>
-class binary_generator : public generator
+class binary_generator : public generator<T>
 {
 private:
     array_sequence<T> generator_storage;
@@ -42,11 +50,11 @@ public:
 };
 
 template <typename T>
-class nary_generator : public generator
+class nary_generator : public generator<T>
 {
 private:
     int arity;
-    array_sequence<T> generator_storage;
+    uniq_ptr<array_sequence<T>> generator_storage;
     std::function<T(sequence<T> *)> sequence_function;
 
 public:
@@ -58,7 +66,7 @@ public:
 };
 
 template <typename T>
-class skip_generator : public generator // подчеркивания убрать
+class skip_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
@@ -77,7 +85,7 @@ public:
 };
 
 template <typename T>
-class insert_generator : public generator
+class insert_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
@@ -93,8 +101,25 @@ public:
     bool has_next() override;
 };
 
+template <typename T, typename T2>
+class map_generator : public generator<T>
+{
+private: 
+    shared_ptr<lazy_sequence<T>> parent;
+    std::function<T2(T)> map_function;
+
+public:
+    map_generator(shared_ptr<lazy_sequence<T>> parent, std::function<T2(T)> func);
+    ~map_generator() = default;
+
+    T &get_next() override;
+    bool has_next() override;
+    optional<T> try_get_next() override;
+    generator<T>* copy() override;
+};
+
 template <typename T>
-class filter_generator : public generator
+class filter_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
@@ -110,12 +135,12 @@ public:
 };
 
 template <typename T>
-class pull_generator : public generator
+class pull_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
     T& element;
-    ordinal index
+    ordinal index;
 
 public:
     pull_generator(shared_ptr<lazy_sequence<T>> parent, const T& item, const ordinal& index);

@@ -66,7 +66,7 @@ nary_generator<T>::nary_generator(lazy_sequence<T> *owner, int ar, std::function
     }
 
     int last_idx = (owner->memoized.get())->get_length() - 1;
-    generator_storage = *((owner->memoized.get())->get_subsequence(last_idx - arity, last_idx));
+    (*generator_storage) = *((owner->memoized.get())->get_subsequence(last_idx - arity, last_idx));
     sequence_function = seqfunc;
 }
 
@@ -149,21 +149,11 @@ template <typename T>
 insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other)
 {
     if (*parent == nullptr || *other == nullptr)
-        this->parent = parent;
-    this->other = other;
-}
-
-template <typename T>
-insert_generator<T>::insert_generator(shared_ptr<lazy_sequence<T>> parent, T& elem)
-{
+    {
+        throw std::invalid_argument("Parent or other is nullptr");
+    }
     this->parent = parent;
-    element = elem;
-}
-
-template <typename T>
-T& insert_generator<T>::get_element()
-{
-    return element;
+    this->other = other;
 }
 
 template <typename T>
@@ -194,4 +184,3 @@ filter_generator<T>::filter_generator(shared_ptr<lazy_sequence<T>> parent, std::
     this->filter_function = filter_function;
 }
 
-template <typename T>
