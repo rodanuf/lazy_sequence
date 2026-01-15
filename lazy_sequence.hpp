@@ -17,7 +17,7 @@ template <typename T>
 class lazy_sequence 
 {
 private:
-    shared_ptr<array_sequence<T>> memoized;
+    mutable shared_ptr<array_sequence<T>> memoized;
     generator<T>* gen; 
     cardinal length; 
 
@@ -41,25 +41,27 @@ public:
 
     lazy_sequence<T>* get_subsequence(int startidx, int endidx);
     lazy_sequence<T>* get_subsequence(const ordinal& start_idx, const ordinal& end_idx);
-    lazy_sequence<T>* concat(lazy_sequence<T>* other);
+    lazy_sequence<T>* concat(const lazy_sequence<T>& other);
     template <typename T2>
     lazy_sequence<T2>* map(std::function<T2(T)> func);
     lazy_sequence<T>* where(std::function<bool(T)> func);
-    lazy_sequence<T>* zip(sequence<T>* seq);
 
     lazy_sequence<T>& set(const T& item, const ordinal& index);
     lazy_sequence<T>& set(const T& item, int index);
     lazy_sequence<T>& set_first(const T& item);
     lazy_sequence<T>& set_last(const T& item);
 
-private:
-    lazy_sequence(int start, int end, shared_ptr<lazy_sequence<T>> parent);
+protected:
 
     generator<T>* get_generator();
+    const generator<T>* get_generator() const;
     shared_ptr<array_sequence<T>> get_memoized();
+    shared_ptr<array_sequence<T>> get_memoized() const;
     cardinal get_length();
+    const cardinal get_length() const;
 
     lazy_sequence<T>& set_generator(generator<T>* gen);
+    lazy_sequence<T>& set_generator(const generator<T>* gen);
     lazy_sequence<T>& set_memoized(shared_ptr<array_sequence<T>> memoized);
     lazy_sequence<T>& set_length(cardinal length);
 };

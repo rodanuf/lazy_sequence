@@ -3,6 +3,7 @@
 #include "lazy_sequence.hpp"
 
 #include "ordinal_test.cpp"
+#include "lazy_sequence_test.cpp"
 
 int main(int argc, char **argv)
 {

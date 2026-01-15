@@ -19,6 +19,8 @@ add_executable(tests
     main_tests.cpp
     term.cpp
     ordinal.cpp
+    lazy_sequence.hpp
+    generators.hpp
 )
 
 target_compile_features(tests PRIVATE cxx_std_20)

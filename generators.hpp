@@ -13,10 +13,11 @@ template <typename T>
 class generator
 {
 public:
+    virtual T &get_other_next() = 0;
     virtual T &get_next() = 0;
     virtual bool has_next() = 0;
     virtual optional<T> try_get_next() = 0;
-    virtual generator<T>* copy() = 0;
+    virtual ~generator() = default;
 };
 
 template <typename T>
@@ -27,11 +28,13 @@ private:
     std::function<T(T)> unary_function;
 
 public:
-    unary_generator(lazy_sequence<T> *owner, std::function<T(T)> unfunc);
+    unary_generator(const lazy_sequence<T>& owner, std::function<T(T)> unfunc);
     ~unary_generator() = default;
 
+    T& get_other_next() override;
     T& get_next() override;
     bool has_next() override;
+    optional<T> try_get_next() override;
 };
 
 template <typename T>
@@ -42,11 +45,13 @@ private:
     std::function<T(T,T)> binary_function;
 
 public:
-    binary_generator(lazy_sequence<T>* onwer, std::function<T(T,T)> binfunc);
+    binary_generator(const lazy_sequence<T>& onwer, std::function<T(T,T)> binfunc);
     ~binary_generator() = default;
 
+    T& get_other_next() override;
     T& get_next() override;
     bool has_next() override;
+    optional<T> try_get_next() override;
 };
 
 template <typename T>
@@ -58,64 +63,47 @@ private:
     std::function<T(sequence<T> *)> sequence_function;
 
 public:
-    nary_generator(lazy_sequence<T> *owner, int ar, std::function<T(sequence<T> *)> seqfunc);
+    nary_generator(const lazy_sequence<T>& owner, int ar, std::function<T(sequence<T> *)> seqfunc);
     ~nary_generator() = default;
 
+    T &get_other_next() override;
     T &get_next() override;
     bool has_next() override;
+    optional<T> try_get_next() override;
 };
 
 template <typename T>
-class skip_generator : public generator<T>
-{
-private:
-    shared_ptr<lazy_sequence<T>> parent;
-    int start_idx;
-    int end_idx;
-
-public:
-    skip_generator(lazy_sequence<T> *owner, lazy_sequence<T> *parent, int start_skip, int end_skip);
-    ~skip_generator() = default;
-
-    void skip();
-    void skip(int new_start, int new_end);
-
-    virtual T &get_next() override;
-    virtual bool has_next() override;
-};
-
-template <typename T>
-class insert_generator : public generator<T>
+class concat_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
     shared_ptr<lazy_sequence<T>> other;
 
 public:
-    insert_generator(shared_ptr<lazy_sequence<T>> parent, shared_ptr<lazy_sequence<T>> other);
-    ~insert_generator() = default;
+    concat_generator(const lazy_sequence<T>& parent, const lazy_sequence<T>& other);
+    ~concat_generator() = default;
 
-    T &get_other_next();
-
+    T &get_other_next() override;
     T &get_next() override;
     bool has_next() override;
+    optional<T> try_get_next() override;
 };
 
 template <typename T, typename T2>
-class map_generator : public generator<T>
+class map_generator : public generator<T2>
 {
 private: 
     shared_ptr<lazy_sequence<T>> parent;
     std::function<T2(T)> map_function;
 
 public:
-    map_generator(shared_ptr<lazy_sequence<T>> parent, std::function<T2(T)> func);
+    map_generator(const lazy_sequence<T>& parent, std::function<T2(T)> func);
     ~map_generator() = default;
 
-    T &get_next() override;
+    T2 &get_other_next() override;
+    T2 &get_next() override;
     bool has_next() override;
-    optional<T> try_get_next() override;
-    generator<T>* copy() override;
+    optional<T2> try_get_next() override;
 };
 
 template <typename T>
@@ -126,9 +114,10 @@ private:
     std::function<bool(T)> filter_function;
 
 public:
-    filter_generator(shared_ptr<lazy_sequence<T>> parent, std::function<bool(T)> filter_funcion);
+    filter_generator(const lazy_sequence<T>& parent, std::function<bool(T)> filter_funcion);
     ~filter_generator() = default;
 
+    T& get_other_next() override;
     T& get_next() override;
     bool has_next() override;
     optional<T> try_get_next() override;
@@ -139,15 +128,18 @@ class pull_generator : public generator<T>
 {
 private:
     shared_ptr<lazy_sequence<T>> parent;
-    T& element;
+    T element;
     ordinal index;
+    ordinal index_initialize;
 
 public:
-    pull_generator(shared_ptr<lazy_sequence<T>> parent, const T& item, const ordinal& index);
+    pull_generator(const lazy_sequence<T>& parent, const T& item, const ordinal& index, const ordinal& start_idx);
     ~pull_generator() = default;
 
-    virtual T &get_next() override;
-    virtual bool has_next() override;
+    T &get_other_next() override;
+    T &get_next() override;
+    bool has_next() override;
+    optional<T> try_get_next() override;
 };
 
 #include "generators.tpp"
