@@ -592,7 +592,7 @@ void run_lazy_sequence_menu()
                         continue;
                     }
 
-                    auto mapped_seq = seq->map<T>(mapper);
+                    auto mapped_seq = seq->template map<T>(mapper);
                     std::cout << "Map result:" << std::endl;
                     print_lazy_sequence(mapped_seq);
                     delete mapped_seq;

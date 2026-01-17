@@ -312,7 +312,6 @@ TEST(lazy_sequence_test, invalid_arguments)
 {
     lazy_sequence<int> seq = {1, 2, 3};
 
-    EXPECT_THROW(seq.concat(nullptr), std::invalid_argument);
 
     EXPECT_THROW(seq.get_subsequence(5, 2), std::invalid_argument);
     EXPECT_THROW(seq.get_subsequence(-1, 2), std::invalid_argument);

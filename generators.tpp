@@ -444,8 +444,9 @@ const T& power_generator<T>::get_next()
 {
     if (count == 0)
     {
+        result = current;
         count++;
-        return 1;
+        return result;
     }
     result = current;
     current *= base;
