@@ -1,17 +1,3 @@
-Struct of the project:
-
-lazy_sequence/
-├── .vscode/
-├── build/
-├── googletest/     ← submodule
-├── lab3_2ndsem/    ← submodule 
-├── pointers/       ← submodule
-├── CMakeLists.txt
-├── main.cpp
-├── lazy_sequence.hpp
-├── ... and other files
-
-
 how to install:
 
 in cmd/bash: 
