@@ -7,7 +7,7 @@ template <typename T>
 optional<T>::optional(const T& value)
 {
     has_value = true;
-    storage.value = value;11
+    storage.value = value;
 }
 
 template <typename T>

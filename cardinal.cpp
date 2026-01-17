@@ -1,8 +1,6 @@
 #include "cardinal.hpp"
 
-cardinal::cardinal() : aleph_idx(0), finite_length(0) {}
-
-cardinal::cardinal(int aleph_idx, int finite_length = 0)
+cardinal::cardinal(int aleph_idx, int finite_length) : aleph_idx(aleph_idx), finite_length(finite_length)
 {
     if (aleph_idx < 0 || finite_length < 0)
     {
@@ -14,6 +12,19 @@ cardinal::cardinal(int aleph_idx, int finite_length = 0)
 cardinal cardinal::operator+(const cardinal& other)
 {
     return cardinal(aleph_idx + other.aleph_idx, finite_length > other.finite_length ? finite_length : other.finite_length);
+}
+
+cardinal cardinal::operator-(int num)
+{
+    if (aleph_idx == 0)
+    {
+        finite_length -= num;
+    }
+    else
+    {
+        return cardinal(*this);
+    }
+    return cardinal(aleph_idx, finite_length);
 }
 
 cardinal& cardinal::operator+=(const cardinal& other)

@@ -8,11 +8,12 @@ private:
     int finite_length;
     
 public:
-    cardinal();
-    cardinal(int aleph_idx, int finite_length = 0);
+    cardinal(int aleph_idx = 0, int finite_length = 0);
+    cardinal(const cardinal& other) = default;
     ~cardinal() = default;
 
     cardinal operator+(const cardinal& other);
+    cardinal operator-(int num);
 
     cardinal& operator+=(const cardinal& other);
 

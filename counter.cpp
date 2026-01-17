@@ -2,7 +2,8 @@
 
 counter::counter()
 {
-    *cur_idx = 0;
+    ordinal *p = new ordinal(0);
+    cur_idx = make_uniq_from(p);
 }
 
 counter::counter(int index)
@@ -13,13 +14,6 @@ counter::counter(int index)
 counter::counter(const ordinal &other)
 {
     this->set_idx(other);
-}
-
-counter counter::operator++(int)
-{
-    counter tmp(this->get_index());
-    (*cur_idx)++;
-    return tmp;
 }
 
 counter &counter::operator++()

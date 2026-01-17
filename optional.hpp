@@ -33,3 +33,4 @@ public:
     operator bool();
 };
 
+#include "optional.tpp"

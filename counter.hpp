@@ -13,7 +13,6 @@ public:
     counter(const ordinal &other);
     ~counter() = default;
 
-    counter operator++(int);
     counter &operator++();
 
     counter &increment_idx();
@@ -27,6 +26,4 @@ public:
 
     int get_num_part();
 
-    void skip(int start, int end);
-    void skip(ordinal start, ordinal end);
 };

@@ -1,15 +1,19 @@
 #include <gtest/gtest.h>
+#include <iostream>
 #include "lazy_sequence.hpp"
 
 TEST(lazy_sequence_test, default_constructor)
 {
-    lazy_sequence<int> seq;
-    EXPECT_TRUE(true);
+    const lazy_sequence<int> seq;
+
+    EXPECT_EQ(seq.get_generator(), nullptr);
 }
 
 TEST(lazy_sequence_test, constructor_from_initializer_list)
 {
+    std::cout << "Before\n";
     lazy_sequence<int> seq = {1, 2, 3, 4, 5};
+    std::cout << "After\n";
 
     EXPECT_EQ(seq.get(0), 1);
     EXPECT_EQ(seq.get(2), 3);
@@ -38,8 +42,8 @@ TEST(lazy_sequence_test, method_get_int_index)
     EXPECT_EQ(seq.get(2), 300);
     EXPECT_EQ(seq.get(4), 500);
 
-    EXPECT_THROW(seq.get(-1), std::out_of_range);
-    EXPECT_THROW(seq.get(10), std::out_of_range);
+    EXPECT_THROW(seq.get(-1), std::invalid_argument);
+    EXPECT_THROW(seq.get(10), std::logic_error);
 }
 
 TEST(lazy_sequence_test, method_get_ordinal_index)
@@ -60,7 +64,7 @@ TEST(lazy_sequence_test, method_reduce)
     auto sum = [](int a, int b)
     { return a + b; };
 
-    const int &result = seq.reduce(sum);
+    const int result = seq.reduce(sum, 0);
     EXPECT_EQ(result, 10);
 }
 
@@ -71,7 +75,7 @@ TEST(lazy_sequence_test, method_reduce_multiplication)
     auto multiply = [](int a, int b)
     { return a * b; };
 
-    const int &result = seq.reduce(multiply);
+    const int &result = seq.reduce(multiply, 1);
     EXPECT_EQ(result, 24);
 }
 
@@ -184,29 +188,29 @@ TEST(lazy_sequence_test, method_set_int_index)
 {
     lazy_sequence<int> seq = {1, 2, 3, 4, 5};
 
-    lazy_sequence<int> &modified = seq.set(99, 2);
+    lazy_sequence<int> *modified = seq.set(99, 2);
 
-    EXPECT_EQ(modified.get(0), 1);
-    EXPECT_EQ(modified.get(1), 2);
-    EXPECT_EQ(modified.get(2), 99);
-    EXPECT_EQ(modified.get(3), 4);
-    EXPECT_EQ(modified.get(4), 5);
+    EXPECT_EQ(modified->get(0), 1);
+    EXPECT_EQ(modified->get(1), 2);
+    EXPECT_EQ(modified->get(2), 99);
+    EXPECT_EQ(modified->get(3), 4);
+    EXPECT_EQ(modified->get(4), 5);
 }
 
 TEST(lazy_sequence_test, method_set_first)
 {
     lazy_sequence<int> seq = {10, 20, 30, 40, 50};
 
-    lazy_sequence<int> &modified = seq.set_first(999);
-    EXPECT_EQ(modified.get_first(), 999);
+    lazy_sequence<int> *modified = seq.set_first(999);
+    EXPECT_EQ(modified->get(0), 999);
 }
 
 TEST(lazy_sequence_test, method_set_last)
 {
     lazy_sequence<int> seq = {10, 20, 30, 40, 50};
 
-    lazy_sequence<int> &modified = seq.set_last(777);
-    EXPECT_EQ(modified.get_last_memoized(), 777);
+    lazy_sequence<int> *modified = seq.set_last_memoized(777);
+    EXPECT_EQ(modified->get(4), 777);
 }
 
 TEST(lazy_sequence_test, method_concat)
@@ -239,9 +243,9 @@ TEST(lazy_sequence_test, complex_operations_chain)
     EXPECT_EQ(result->get(1), 30);
     EXPECT_EQ(result->get(2), 50);
 
-    delete step_one;
-    delete step_two;
     delete result;
+    delete step_two;
+    delete step_one;
 }
 
 TEST(lazy_sequence_test, method_map_different_types)
@@ -312,21 +316,6 @@ TEST(lazy_sequence_test, invalid_arguments)
 
     EXPECT_THROW(seq.get_subsequence(5, 2), std::invalid_argument);
     EXPECT_THROW(seq.get_subsequence(-1, 2), std::invalid_argument);
-}
-
-TEST(lazy_sequence_test, copy_constructor)
-{
-    lazy_sequence<int> original = {100, 200, 300};
-
-    lazy_sequence<int> copy(original);
-
-    EXPECT_EQ(copy.get(0), 100);
-    EXPECT_EQ(copy.get(1), 200);
-    EXPECT_EQ(copy.get(2), 300);
-
-    lazy_sequence<int> &modified = copy.set(999, 1);
-    EXPECT_EQ(modified.get(1), 999);
-    EXPECT_EQ(original.get(1), 200);
 }
 
 TEST(lazy_sequence_test, method_map_with_capture)

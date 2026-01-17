@@ -4,6 +4,7 @@
 #include "cardinal.hpp"
 #include "term.hpp"
 #include "lab3_2ndsem/headers/array_sequence.hpp"
+#include "cardinal.hpp"
 
 
 class ordinal
@@ -22,6 +23,7 @@ public:
     ordinal(const cantor_form& other);
     ordinal(const term& other);
     ordinal(const ordinal& other);
+    ordinal(const cardinal& other);
     ~ordinal() = default;
 
     ordinal operator+(const ordinal& other);
@@ -43,8 +45,8 @@ public:
 
     bool operator==(const ordinal& other) const;
     bool operator==(int num) const;
-    bool operator!=(const ordinal& other);
-    bool operator!=(int num);
+    bool operator!=(const ordinal& other) const;
+    bool operator!=(int num) const;
     bool operator<(const ordinal& other);
     bool operator<(int num);
     bool operator>(const ordinal& other);

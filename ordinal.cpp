@@ -40,6 +40,11 @@ ordinal::ordinal(const term& other)
 
 ordinal::ordinal(const ordinal& other) : form(other.form), numerical_part(other.numerical_part) {}
 
+ordinal::ordinal(const cardinal& other)
+{
+    *this = ordinal(term(other.get_finite_length(), other.get_aleph_idx() - 1));
+}
+
 ordinal ordinal::operator+(const ordinal& other)
 {
     if (*this < other && !(other.is_finite()))
@@ -367,12 +372,12 @@ return numerical_part == num;
     return false;
 }
 
-bool ordinal::operator!=(const ordinal &other)
+bool ordinal::operator!=(const ordinal &other) const
 {
     return !(*this == other);
 }
 
-bool ordinal::operator!=(int num)
+bool ordinal::operator!=(int num) const
 {
     return !(*this == num);
 }

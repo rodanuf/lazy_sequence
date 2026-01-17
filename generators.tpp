@@ -12,22 +12,22 @@ unary_generator<T>::unary_generator(const lazy_sequence<T>& owner, std::function
 }
 
 template <typename T>
-T& unary_generator<T>::get_other_next()
+const T& unary_generator<T>::get_other_next()
 {
     return this->get_next();
 }
 
 template <typename T>
-T& unary_generator<T>::get_next()
+const T& unary_generator<T>::get_next()
 {
     generator_storage = unary_function(generator_storage);
     return generator_storage;
 }
 
 template <typename T>
-bool unary_generator<T>::has_next()
+bool unary_generator<T>::has_next() const
 {
-    return unary_function(generator_storage);
+    return true;
 }
 
 template <typename T>
@@ -39,7 +39,7 @@ optional<T> unary_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }
 
@@ -60,13 +60,13 @@ binary_generator<T>::binary_generator(const lazy_sequence<T>& owner, std::functi
 }
 
 template <typename T>
-T& binary_generator<T>::get_other_next()
+const T& binary_generator<T>::get_other_next()
 {
     return this->get_next();
 }
 
 template <typename T>
-T& binary_generator<T>::get_next()
+const T& binary_generator<T>::get_next()
 {
     T &result = binary_function(generator_storage.get_first(), generator_storage.get_last());
     generator_storage.remove_at(0);
@@ -75,7 +75,7 @@ T& binary_generator<T>::get_next()
 }
 
 template <typename T>
-bool binary_generator<T>::has_next()
+bool binary_generator<T>::has_next() const
 {
     return binary_function(generator_storage.get_first(), generator_storage.get_last());
 }
@@ -89,7 +89,7 @@ optional<T> binary_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }
 
@@ -106,18 +106,18 @@ nary_generator<T>::nary_generator(const lazy_sequence<T>& owner, int ar, std::fu
     }
 
     int last_idx = (owner.memoized.get()).get_length() - 1;
-    generator_storage = uniq_ptr<array_sequence<T>>(new array_sequence<T>(*((owner->memoized.get())->get_subsequence(last_idx - arity, last_idx))));
+    generator_storage = uniq_ptr<array_sequence<T>>(new array_sequence<T>(*((owner.memoized->get())->get_subsequence(last_idx - arity, last_idx))));
     sequence_function = seqfunc;
 }
 
 template <typename T>
-T& nary_generator<T>::get_other_next()
+const T& nary_generator<T>::get_other_next()
 {
     return this->get_next();
 }
 
 template <typename T>
-T& nary_generator<T>::get_next()
+const T& nary_generator<T>::get_next()
 {
     T result = sequence_function(generator_storage.get());
     generator_storage->append_element(result);
@@ -126,9 +126,9 @@ T& nary_generator<T>::get_next()
 }
 
 template <typename T>
-bool nary_generator<T>::has_next()
+bool nary_generator<T>::has_next() const
 {
-    return this->get_next();
+    return true;
 }
 
 template <typename T>
@@ -140,7 +140,7 @@ optional<T> nary_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }
 
@@ -150,30 +150,26 @@ optional<T> nary_generator<T>::try_get_next()
 template <typename T>
 concat_generator<T>::concat_generator(const lazy_sequence<T>& parent, const lazy_sequence<T>& other)
 {
-    if (*parent == nullptr || *other == nullptr)
-    {
-        throw std::invalid_argument("Parent or other is nullptr");
-    }
-    this->parent = shared_ptr(&parent);
-    this->other = shared_ptr(&other);
+    this->parent = &parent;
+    this->other = &other;
 }
 
 template <typename T>
-T& concat_generator<T>::get_other_next()
+const T& concat_generator<T>::get_other_next()
 {
-    return (*other).gen->get_next();
+    return other->get_next();
 }
 
 template <typename T>
-T& concat_generator<T>::get_next()
+const T& concat_generator<T>::get_next()
 {
-    return (*parent).gen.get_next();
+    return parent->get_next();
 }
 
 template <typename T>
-bool concat_generator<T>::has_next()
+bool concat_generator<T>::has_next() const
 {
-    return (*parent).gen.has_next();
+    return parent->get_generator()->has_next();
 }
 
 template <typename T>
@@ -185,7 +181,7 @@ optional<T> concat_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }
 
@@ -195,27 +191,28 @@ optional<T> concat_generator<T>::try_get_next()
 template <typename T, typename T2>
 map_generator<T, T2>::map_generator(const lazy_sequence<T>& parent, std::function<T2(T)> func)
 {
-    this->parent = shared_ptr(&parent);
+    this->parent = &parent;
     this->map_function = func;
 }
 
 template <typename T, typename T2>
-T2& map_generator<T, T2>::get_other_next()
+const T2& map_generator<T, T2>::get_other_next()
 {
-    return map_function((*parent).gen.get_next());
+    T next = parent->get_next();
+    return map_function(next);
 }
 
 
 template <typename T, typename T2>
-T2& map_generator<T, T2>::get_next()
+const T2& map_generator<T, T2>::get_next()
 {
-    return map_function((*parent).gen.get_next());
+    return map_function(parent->get_next());
 }
 
 template <typename T, typename T2>
-bool map_generator<T, T2>::has_next()
+bool map_generator<T, T2>::has_next() const
 {
-    return (*parent).gen.has_next();
+    return parent->get_generator()->has_next();
 }
 
 template <typename T, typename T2>
@@ -227,7 +224,7 @@ optional<T2> map_generator<T, T2>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T2>();
     }
 }
 
@@ -237,31 +234,31 @@ optional<T2> map_generator<T, T2>::try_get_next()
 template <typename T>
 filter_generator<T>::filter_generator(const lazy_sequence<T>& parent, std::function<bool(T)> filter_function)
 {
-    this->parent = shared_ptr(&parent);
+    this->parent = &parent;
     this->filter_function = filter_function;
 }
 
 template <typename T>
-T& filter_generator<T>::get_other_next()
+const T& filter_generator<T>::get_other_next()
 {
     return this->get_next();
 }
 
 template <typename T>
-T& filter_generator<T>::get_next()
+const T& filter_generator<T>::get_next()
 {
-    T &result = (*parent).gen.get_next();
+    T result = parent->get_next();
     while (!filter_function(result))
     {
-        result = (*parent).gen.get_next();
+        result = parent->get_next();
     }
-    return result;
+    return filter_function(result);
 }
 
 template <typename T>
-bool filter_generator<T>::has_next()
+bool filter_generator<T>::has_next() const
 {
-    T &result = (*parent).gen.get_next();
+    T result = parent->get_next();
     if (!filter_function(result))
     {
         return false;
@@ -279,7 +276,7 @@ optional<T> filter_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }
 
@@ -288,14 +285,20 @@ optional<T> filter_generator<T>::try_get_next()
 template <typename T>
 pull_generator<T>::pull_generator(const lazy_sequence<T>& parent, const T& item, const ordinal& index, const ordinal& start_idx)
 {
-    this->parent = shared_ptr(&parent);
+    this->parent = &parent;
     element = item;
-    index = index;
+    this->index = index;
     index_initialize = start_idx;
 }
 
 template <typename T>
-T& pull_generator<T>::get_next()
+const T& pull_generator<T>::get_other_next()
+{
+    return this->get_next();
+}
+
+template <typename T>
+const T& pull_generator<T>::get_next()
 {
     if (index == index_initialize)
     {
@@ -303,12 +306,13 @@ T& pull_generator<T>::get_next()
     }
     else
     {
-        return (*parent).gen.get_next();
+        index++;
+        return parent->get_next();
     }
 }
 
 template <typename T>
-bool pull_generator<T>::has_next()
+bool pull_generator<T>::has_next() const
 {
     if (index == index_initialize)
     {
@@ -316,7 +320,7 @@ bool pull_generator<T>::has_next()
     }
     else
     {
-        return (*parent).gen.has_next();
+        return parent->get_generator()->has_next();
     }
 }
 
@@ -329,6 +333,6 @@ optional<T> pull_generator<T>::try_get_next()
     }
     else
     {
-        return optional();
+        return optional<T>();
     }
 }

@@ -13,9 +13,9 @@ template <typename T>
 class generator
 {
 public:
-    virtual T &get_other_next() = 0;
-    virtual T &get_next() = 0;
-    virtual bool has_next() = 0;
+    virtual const T &get_other_next() = 0;
+    virtual const T &get_next() = 0;
+    virtual bool has_next() const = 0;
     virtual optional<T> try_get_next() = 0;
     virtual ~generator() = default;
 };
@@ -31,9 +31,9 @@ public:
     unary_generator(const lazy_sequence<T>& owner, std::function<T(T)> unfunc);
     ~unary_generator() = default;
 
-    T& get_other_next() override;
-    T& get_next() override;
-    bool has_next() override;
+    const T& get_other_next() override;
+    const T& get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
@@ -48,9 +48,9 @@ public:
     binary_generator(const lazy_sequence<T>& onwer, std::function<T(T,T)> binfunc);
     ~binary_generator() = default;
 
-    T& get_other_next() override;
-    T& get_next() override;
-    bool has_next() override;
+    const T& get_other_next() override;
+    const T& get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
@@ -64,11 +64,12 @@ private:
 
 public:
     nary_generator(const lazy_sequence<T>& owner, int ar, std::function<T(sequence<T> *)> seqfunc);
+    nary_generator(const nary_generator<T>& other);
     ~nary_generator() = default;
 
-    T &get_other_next() override;
-    T &get_next() override;
-    bool has_next() override;
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
@@ -76,16 +77,16 @@ template <typename T>
 class concat_generator : public generator<T>
 {
 private:
-    shared_ptr<lazy_sequence<T>> parent;
-    shared_ptr<lazy_sequence<T>> other;
+    const lazy_sequence<T>* parent;
+    const lazy_sequence<T>* other;
 
 public:
     concat_generator(const lazy_sequence<T>& parent, const lazy_sequence<T>& other);
     ~concat_generator() = default;
 
-    T &get_other_next() override;
-    T &get_next() override;
-    bool has_next() override;
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
@@ -93,16 +94,16 @@ template <typename T, typename T2>
 class map_generator : public generator<T2>
 {
 private: 
-    shared_ptr<lazy_sequence<T>> parent;
+    const lazy_sequence<T>* parent;
     std::function<T2(T)> map_function;
 
 public:
     map_generator(const lazy_sequence<T>& parent, std::function<T2(T)> func);
     ~map_generator() = default;
 
-    T2 &get_other_next() override;
-    T2 &get_next() override;
-    bool has_next() override;
+    const T2 &get_other_next() override;
+    const T2 &get_next() override;
+    bool has_next() const override;
     optional<T2> try_get_next() override;
 };
 
@@ -110,16 +111,16 @@ template <typename T>
 class filter_generator : public generator<T>
 {
 private:
-    shared_ptr<lazy_sequence<T>> parent;
+    const lazy_sequence<T>* parent;
     std::function<bool(T)> filter_function;
 
 public:
     filter_generator(const lazy_sequence<T>& parent, std::function<bool(T)> filter_funcion);
     ~filter_generator() = default;
 
-    T& get_other_next() override;
-    T& get_next() override;
-    bool has_next() override;
+    const T& get_other_next() override;
+    const T& get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
@@ -127,7 +128,7 @@ template <typename T>
 class pull_generator : public generator<T>
 {
 private:
-    shared_ptr<lazy_sequence<T>> parent;
+    const lazy_sequence<T>* parent;
     T element;
     ordinal index;
     ordinal index_initialize;
@@ -136,9 +137,9 @@ public:
     pull_generator(const lazy_sequence<T>& parent, const T& item, const ordinal& index, const ordinal& start_idx);
     ~pull_generator() = default;
 
-    T &get_other_next() override;
-    T &get_next() override;
-    bool has_next() override;
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
     optional<T> try_get_next() override;
 };
 
