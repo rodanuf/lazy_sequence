@@ -50,7 +50,15 @@ lazy_sequence<T>::lazy_sequence(sequence<T>* seq, generator<T>* gen)
 {
     if (seq == nullptr)
     {
-        throw std::invalid_argument("Seq is null");
+        auto ar_seq = new array_sequence<T>();
+        this->set_memoized(shared_ptr<array_sequence<T>>(ar_seq));
+        this->set_length(cardinal(0, 0));
+    }
+    else
+    {
+        auto ar_seq = new array_sequence<T>(*seq);
+        this->set_memoized(shared_ptr<array_sequence<T>>(ar_seq));
+        this->set_length(cardinal(0, seq->get_length()));
     }
 
     if (!gen)
@@ -61,10 +69,7 @@ lazy_sequence<T>::lazy_sequence(sequence<T>* seq, generator<T>* gen)
     {
         this->set_generator(gen);
     }
-    auto ar_seq = new array_sequence<T>(*seq);
-    this->set_memoized(shared_ptr<array_sequence<T>> (ar_seq));
     this->set_generator(gen);
-    this->set_length(cardinal(0, seq->get_length()));
 }
 
 template <typename T>

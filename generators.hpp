@@ -143,4 +143,59 @@ public:
     optional<T> try_get_next() override;
 };
 
+template <typename T>
+class increment_generator : public generator<T>
+{
+private:
+    T current;
+    T increment_by;
+    T result;
+
+public:
+    increment_generator(const T& start, const T& increment);
+    ~increment_generator() = default;
+
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
+    optional<T> try_get_next() override;
+};
+
+template <typename T>
+class fibonacci_generator : public generator<T>
+{
+private:
+    T first;
+    T second;
+    T last_value;
+
+public:
+    fibonacci_generator(const T& first_elem, const T& second_elem);
+    ~fibonacci_generator() = default;
+
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
+    optional<T> try_get_next() override;
+};
+
+template <typename T>
+class power_generator : public generator<T>
+{
+private:
+    T base;
+    T current;
+    int count;
+    T result;
+
+public:
+    power_generator(const T& base);
+    ~power_generator() = default;
+
+    const T &get_other_next() override;
+    const T &get_next() override;
+    bool has_next() const override;
+    optional<T> try_get_next() override;
+};
+
 #include "generators.tpp"

@@ -336,3 +336,138 @@ optional<T> pull_generator<T>::try_get_next()
         return optional<T>();
     }
 }
+
+
+
+
+template <typename T>
+increment_generator<T>::increment_generator(const T& start, const T& increment) : current(start), increment_by(increment), result(0) {}
+
+template <typename T>
+const T& increment_generator<T>::get_other_next()
+{
+    return this->get_next();
+}
+
+template <typename T>
+const T& increment_generator<T>::get_next()
+{
+    result = current;
+    current = current + increment_by;
+    return result;
+}
+
+template <typename T>
+bool increment_generator<T>::has_next() const
+{
+    return true;
+}
+
+template <typename T>
+optional<T> increment_generator<T>::try_get_next()
+{
+    if (this->has_next())
+    {
+        return optional(this->get_next());
+    }
+    else
+    {
+        return optional<T>();
+    }
+}
+
+
+
+
+template <typename T>
+fibonacci_generator<T>::fibonacci_generator(const T& first_element, const T& second_element)
+{
+    first = first_element;
+    second = second_element;
+    last_value = 0;
+}
+
+template <typename T>
+const T& fibonacci_generator<T>::get_other_next()
+{
+    return this->get_next();
+}
+
+template <typename T>
+const T& fibonacci_generator<T>::get_next()
+{
+    last_value = first;
+    first = second;
+    second = last_value + second;
+    return last_value;
+}
+
+template <typename T>
+bool fibonacci_generator<T>::has_next() const
+{
+    return true;
+}
+
+template <typename T>
+optional<T> fibonacci_generator<T>::try_get_next()
+{
+    if (this->has_next())
+    {
+        return optional(this->get_next());
+    }
+    else
+    {
+        return optional<T>();
+    }
+}
+
+
+
+
+template <typename T>
+power_generator<T>::power_generator(const T& base)
+{
+    this->base = base;
+    current = 1;
+    count = 0;
+    result = 0;
+}
+
+template <typename T>
+const T& power_generator<T>::get_other_next()
+{
+    return this->get_next();
+}
+
+template <typename T>
+const T& power_generator<T>::get_next()
+{
+    if (count == 0)
+    {
+        count++;
+        return 1;
+    }
+    result = current;
+    current *= base;
+    count++;
+    return result;
+}
+
+template <typename T>
+bool power_generator<T>::has_next() const
+{
+    return true;
+}
+
+template <typename T>
+optional<T> power_generator<T>::try_get_next()
+{
+    if (this->has_next())
+    {
+        return optional(this->get_next());
+    }
+    else
+    {
+        return optional<T>();
+    }
+}

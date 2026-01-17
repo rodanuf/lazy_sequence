@@ -15,6 +15,17 @@ file(GLOB TEMPLATES "*.tpp")
 option(BUILD_GMOCK "Build gmock" OFF)
 add_subdirectory(googletest EXCLUDE_FROM_ALL)
 
+add_executable(lab
+    main.cpp
+    lazy_sequence.hpp
+    ordinal.cpp
+    cardinal.cpp
+    term.cpp
+    counter.cpp
+    generators.hpp
+
+)
+
 add_executable(tests
     main_tests.cpp
     term.cpp
